@@ -13,11 +13,11 @@ const brandConfig = defineConfig({
         },
       },
       fonts: {
-        heading: { value: "Instrument Serif, serif" },
-        body: { value: "Inter, sans-serif" },
+        heading: { value: "Geist, sans-serif" },
+        body: { value: "Geist, sans-serif" },
       },
       radii: {
-        brand: { value: "1.25rem" },
+        brand: { value: "1rem" },
       },
     },
   },
