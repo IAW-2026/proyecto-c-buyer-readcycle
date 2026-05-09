@@ -19,23 +19,31 @@ export function Navbar() {
   return (
     <Box
       as="header"
-      borderBottomWidth="1px"
-      borderColor="brand.sand"
       bg="brand.beige"
       position="sticky"
       top="0"
       zIndex="sticky"
+      boxShadow="md"
+      transition="all 0.3s ease"
     >
       <Container maxW="7xl" px={{ base: "4", md: "6" }}>
         <Flex minH="16" align="center" gap="4">
-          <Box flex="1" minW="0">
-            <Link asChild textDecoration="none" _hover={{ textDecoration: "none" }} display="flex" justifyContent="flex-start">
+          <Box flex="1" minW="0" py="2">
+            <Link 
+              asChild 
+              textDecoration="none" 
+              _hover={{ textDecoration: "none" }} 
+              _focus={{ outline: "none" }}
+              _focusVisible={{ outline: "none", boxShadow: "none" }}
+              display="flex" 
+              justifyContent="flex-start"
+            >
               <NextLink href="/">
                 <Image
-                  src="/LogoPng.png"
+                  src="/Logo.png"
                   alt="ReadCycle Logo"
-                  width={100}
-                  height={50}
+                  width={200}
+                  height={80}
                   priority
                   style={{ objectFit: "contain" }}
                 />
@@ -101,16 +109,18 @@ export function Navbar() {
               >
                 Ofertas
               </Button>
-              <IconButton
-                aria-label="Ver carrito"
-                color="brand.forest"
-                borderRadius="brand"
-                size="sm"
-                variant="ghost"
-                _hover={{ bg: "brand.sand" }}
-              >
-                <LuShoppingCart />
-              </IconButton>
+              <NextLink href="/cart" passHref>
+                <IconButton
+                  aria-label="Ver carrito"
+                  color="brand.forest"
+                  borderRadius="brand"
+                  size="sm"
+                  variant="ghost"
+                  _hover={{ bg: "brand.sand" }}
+                >
+                  <LuShoppingCart />
+                </IconButton>
+              </NextLink>
               <IconButton
                 aria-label="Ver perfil"
                 bg="brand.sage"

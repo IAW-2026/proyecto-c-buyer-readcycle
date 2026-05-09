@@ -1,27 +1,64 @@
-import { Button, Card, Image, Text } from "@chakra-ui/react"
+// app/page.tsx
 
+import { Box, Container, Grid } from "@chakra-ui/react";
 
-export default function Home() {
+import HeroBanner from "@/components/home/HeroBanner";
+import BooksTabs from "@/components/home/Tabs";
+import BookCard from "@/components/home/Card";
+
+const books = [
+  {
+    title: "El Aleph",
+    author: "Jorge Luis Borges",
+    price: "$18.500",
+    status: "EXCELENTE" as const,
+    image: "/images/book-1.jpg",
+  },
+  {
+    title: "Cien años de soledad",
+    author: "Gabriel García Márquez",
+    price: "$15.200",
+    status: "BUEN ESTADO" as const,
+    image: "/images/book-2.jpg",
+  },
+  {
+    title: "Rayuela",
+    author: "Julio Cortázar",
+    price: "$21.000",
+    status: "EXCELENTE" as const,
+    image: "/images/book-3.jpg",
+  },
+  {
+    title: "Ficciones",
+    author: "Jorge Luis Borges",
+    price: "$12.400",
+    status: "BUEN ESTADO" as const,
+    image: "/images/book-4.jpg",
+  },
+];
+
+export default function HomePage() {
   return (
-    <Card.Root maxW="sm" overflow="hidden">
-      <Image
-        src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-        alt="Green double couch with wooden legs"
-      />
-      <Card.Body gap="2">
-        <Card.Title>Living room Sofa</Card.Title>
-        <Card.Description>
-          This sofa is perfect for modern tropical spaces, baroque inspired
-          spaces.
-        </Card.Description>
-        <Text textStyle="2xl" fontWeight="medium" letterSpacing="tight" mt="2">
-          $450
-        </Text>
-      </Card.Body>
-      <Card.Footer gap="2">
-        <Button variant="solid">Buy now</Button>
-        <Button variant="ghost">Add to cart</Button>
-      </Card.Footer>
-    </Card.Root>
-  )
+    <Box bg="brand.beige" minH="100vh">
+      <Container maxW="8xl">
+        <HeroBanner />
+
+        <BooksTabs />
+
+        <Grid
+          templateColumns={{
+            base: "1fr",
+            md: "repeat(2,1fr)",
+            xl: "repeat(4,1fr)",
+          }}
+          gap={6}
+          py={8}
+        >
+          {books.map((book) => (
+            <BookCard key={book.title} {...book} />
+          ))}
+        </Grid>
+      </Container>
+    </Box>
+  );
 }
