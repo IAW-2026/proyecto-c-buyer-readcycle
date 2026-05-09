@@ -9,6 +9,7 @@ import {
   IconButton,
   Input,
   Link,
+  Menu,
   Text,
 } from "@chakra-ui/react"
 import Image from "next/image"
@@ -85,18 +86,41 @@ export function Navbar() {
 
           <Flex flex="1" justify="flex-end" minW="0">
             <HStack gap="3">
-              <Button
-                color="brand.forest"
-                size="sm"
-                borderRadius="brand"
-                variant="ghost"
-                fontFamily="heading"
-                fontWeight="600"
-                _hover={{ bg: "brand.sand" }}
-                display={{ base: "none", md: "flex" }}
-              >
-                Categorias
-              </Button>
+              <Box position="relative">
+                <Menu.Root positioning={{ placement: "bottom-start" }}>
+                  <Menu.Trigger asChild>
+                    <Button
+                      color="brand.forest"
+                      size="sm"
+                      borderRadius="brand"
+                      variant="ghost"
+                      fontFamily="heading"
+                      fontWeight="600"
+                      _hover={{ bg: "brand.sand" }}
+                      display={{ base: "none", md: "flex" }}
+                    >
+                      Categorías
+                    </Button>
+                  </Menu.Trigger>
+                  <Menu.Content position="absolute" top="100%" left="50%" transform="translateX(-50%)" mt="2" bg="white" borderColor="brand.sand" borderRadius="brand" boxShadow="md" py="2" zIndex="popover">
+                    <Menu.Item value="ficcion" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
+                      Ficción
+                    </Menu.Item>
+                    <Menu.Item value="no-ficcion" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
+                      No Ficción
+                    </Menu.Item>
+                    <Menu.Item value="infantil" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
+                      Infantil
+                    </Menu.Item>
+                    <Menu.Item value="juvenil" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
+                      Juvenil
+                    </Menu.Item>
+                    <Menu.Item value="academico" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
+                      Académico
+                    </Menu.Item>
+                  </Menu.Content>
+                </Menu.Root>
+              </Box>
               <Button
                 bg="brand.clay"
                 borderRadius="brand"
