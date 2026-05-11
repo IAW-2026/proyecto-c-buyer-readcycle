@@ -14,7 +14,8 @@ import {
 } from "@chakra-ui/react"
 import Image from "next/image"
 import NextLink from "next/link"
-import { LuSearch, LuShoppingCart, LuUser } from "react-icons/lu"
+import { LuSearch, LuShoppingCart } from "react-icons/lu"
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
 
 export function Navbar() {
   return (
@@ -24,19 +25,19 @@ export function Navbar() {
       position="sticky"
       top="0"
       zIndex="sticky"
-      boxShadow="md"
+      boxShadow="sm"
       transition="all 0.3s ease"
     >
-      <Container maxW="7xl" px={{ base: "4", md: "6" }}>
-        <Flex minH="16" align="center" gap="4">
+      <Container maxW="8xl" px={{ base: "4", md: "8" }}>
+        <Flex minH="16" align="center" justify="space-between" gap={{ base: "4", lg: "10" }}>
           <Box flex="1" minW="0" py="2">
-            <Link 
-              asChild 
-              textDecoration="none" 
-              _hover={{ textDecoration: "none" }} 
+            <Link
+              asChild
+              textDecoration="none"
+              _hover={{ textDecoration: "none" }}
               _focus={{ outline: "none" }}
               _focusVisible={{ outline: "none", boxShadow: "none" }}
-              display="flex" 
+              display="flex"
               justifyContent="flex-start"
             >
               <NextLink href="/">
@@ -52,7 +53,7 @@ export function Navbar() {
             </Link>
           </Box>
 
-          <Box flex="2" maxW={{ base: "none", lg: "xl" }}>
+          <Box flex="1" maxW={{ base: "none", md: "md", lg: "lg" }} mx="auto">
             <Box position="relative">
               <Box
                 color="brand.sage"
@@ -69,14 +70,17 @@ export function Navbar() {
                 placeholder="Buscar libros, autores o categorias"
                 ps="10"
                 bg="white"
-                borderColor="brand.sand"
                 borderRadius="brand"
                 color="brand.forest"
                 fontFamily="body"
                 fontWeight="500"
+                borderColor="brand.sage"
+                boxShadow="0 0 0 0.5px var(--chakra-colors-brand-sage), var(--chakra-shadows-sm)"
+                transition="transform 0.2s ease, box-shadow 0.2s ease"
                 _focusVisible={{
-                  borderColor: "brand.sage",
-                  boxShadow: "0 0 0 1px var(--chakra-colors-brand-sage)",
+                  transform: "scale(1.02)",
+                  boxShadow: "0 0 0 1px var(--chakra-colors-brand-sage), var(--chakra-shadows-md)",
+                  borderColor: "brand.sage"
                 }}
                 _placeholder={{ color: "brand.sage" }}
                 variant="outline"
@@ -85,18 +89,18 @@ export function Navbar() {
           </Box>
 
           <Flex flex="1" justify="flex-end" minW="0">
-            <HStack gap="3">
+            <HStack gap={{ base: "3", md: "6" }}>
               <Box position="relative">
                 <Menu.Root positioning={{ placement: "bottom-start" }}>
                   <Menu.Trigger asChild>
                     <Button
+                      bg="rgba(0, 0, 0, 0.06)"
                       color="brand.forest"
                       size="sm"
                       borderRadius="brand"
-                      variant="ghost"
                       fontFamily="heading"
                       fontWeight="600"
-                      _hover={{ bg: "brand.sand" }}
+                      _hover={{ bg: "rgba(0, 0, 0, 0.12)" }}
                       display={{ base: "none", md: "flex" }}
                     >
                       Categorías
@@ -121,40 +125,53 @@ export function Navbar() {
                   </Menu.Content>
                 </Menu.Root>
               </Box>
-              <Button
-                bg="brand.clay"
-                borderRadius="brand"
-                color="white"
-                size="sm"
-                fontFamily="heading"
-                fontWeight="600"
-                _hover={{ bg: "brand.sage" }}
-                display={{ base: "none", md: "flex" }}
-              >
-                Ofertas
-              </Button>
-              <NextLink href="/cart" passHref>
-                <IconButton
-                  aria-label="Ver carrito"
-                  color="brand.forest"
-                  borderRadius="brand"
-                  size="sm"
-                  variant="ghost"
-                  _hover={{ bg: "brand.sand" }}
-                >
-                  <LuShoppingCart />
-                </IconButton>
-              </NextLink>
-              <IconButton
-                aria-label="Ver perfil"
-                bg="brand.sage"
-                borderRadius="brand"
-                color="white"
-                size="sm"
-                _hover={{ bg: "brand.forest" }}
-              >
-                <LuUser />
-              </IconButton>
+              <Show when="signed-out">
+                <SignInButton mode="modal">
+                  <Button
+                    variant="outline"
+                    borderColor="brand.sage"
+                    color="brand.forest"
+                    size="sm"
+                    borderRadius="brand"
+                    fontFamily="heading"
+                    fontWeight="600"
+                    _hover={{ bg: "brand.sand" }}
+                    display={{ base: "none", md: "flex" }}
+                  >
+                    Ingresar
+                  </Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button
+                    bg="brand.sage"
+                    borderRadius="brand"
+                    color="white"
+                    size="sm"
+                    fontFamily="heading"
+                    fontWeight="600"
+                    _hover={{ bg: "brand.forest" }}
+                  >
+                    Registrarse
+                  </Button>
+                </SignUpButton>
+              </Show>
+              <Show when="signed-in">
+                <NextLink href="/cart" passHref>
+                  <IconButton
+                    aria-label="Ver carrito"
+                    bg="rgba(0, 0, 0, 0.06)"
+                    color="brand.forest"
+                    borderRadius="brand"
+                    size="sm"
+                    _hover={{ bg: "rgba(0, 0, 0, 0.12)" }}
+                  >
+                    <LuShoppingCart />
+                  </IconButton>
+                </NextLink>
+                <Box>
+                  <UserButton />
+                </Box>
+              </Show>
             </HStack>
           </Flex>
         </Flex>
