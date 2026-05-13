@@ -17,6 +17,7 @@ import {
 import { useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import { useAuth, useClerk } from "@clerk/nextjs";
+import Link from "next/link";
 
 interface BookCardProps {
   image: string;
@@ -24,6 +25,7 @@ interface BookCardProps {
   author: string;
   price: string;
   status: "EXCELENTE" | "BUEN ESTADO";
+  stock?: number;
 }
 
 export default function BookCard({
@@ -32,6 +34,7 @@ export default function BookCard({
   author,
   price,
   status,
+  stock = 1,
 }: BookCardProps) {
   const isExcellent = status === "EXCELENTE";
   const { userId } = useAuth();
@@ -126,94 +129,119 @@ export default function BookCard({
           </Box>
         </Portal>
       )}
-      <Box
-        bg="white"
-        borderRadius="brand"
-        overflow="hidden"
-        border="1px solid"
-        borderColor="black"
-        transition="all 0.2s ease"
-        _hover={{
-          transform: "translateY(-6px)",
-          shadow: "md",
-        }}
-      >
-        {/* Imagen */}
-        <Box p={3}>
-          <Image
-            src={image}
-            alt={title}
-            w="100%"
-            h="200px"
-            objectFit="cover"
-            borderRadius="brand"
-          />
-        </Box>
-
-        {/* Contenido */}
-        <VStack align="stretch" gap={4} px={5} pb={5}>
-          <Badge
-            alignSelf="flex-start"
-            px={3}
-            py={1}
-            borderRadius="full"
-            fontSize="10px"
-            fontWeight="700"
-            letterSpacing="0.08em"
-            textTransform="uppercase"
-            bg={isExcellent ? "brand.sage" : "brand.clay"}
-            color="brand.beige"
-          >
-            {status}
-          </Badge>
-
-          <Box>
-            <Heading
-              size="md"
-              color="brand.forest"
-              fontFamily="heading"
-              lineClamp={1}
-            >
-              {title}
-            </Heading>
-
-            <Text
-              mt={1}
-              color="brand.sage"
-              fontSize="sm"
-              fontFamily="body"
-            >
-              {author}
-            </Text>
+      <Link href="/product/1" style={{ display: 'block', textDecoration: 'none' }}>
+        <Box
+          bg="white"
+          borderRadius="brand"
+          overflow="hidden"
+          border="1px solid"
+          borderColor="black"
+          transition="all 0.2s ease"
+          _hover={{
+            transform: "translateY(-6px)",
+            shadow: "md",
+          }}
+          _focus={{ outline: "none" }}
+        >
+          {/* Imagen */}
+          <Box p={3}>
+            <Image
+              src={image}
+              alt={title}
+              w="100%"
+              h="200px"
+              objectFit="cover"
+              borderRadius="brand"
+            />
           </Box>
 
-          <HStack justify="space-between" align="center">
-            <Text
-              fontSize="2xl"
+          {/* Contenido */}
+          <VStack align="stretch" gap={4} px={5} pb={5}>
+            <Badge
+              alignSelf="flex-start"
+              px={3}
+              py={1}
+              borderRadius="full"
+              fontSize="10px"
               fontWeight="700"
-              color="brand.forest"
-              fontFamily="heading"
-            >
-              {price}
-            </Text>
-
-            <IconButton
-              aria-label="Agregar libro"
-              rounded="full"
-              bg="brand.forest"
+              letterSpacing="0.08em"
+              textTransform="uppercase"
+              bg={isExcellent ? "brand.sage" : "brand.clay"}
               color="brand.beige"
-              size="md"
-              transition="all 0.2s ease"
-              _hover={{
-                bg: "brand.clay",
-              }}
-              onClick={handleAddToCart}
             >
-              <LuPlus />
-            </IconButton>
-          </HStack>
-        </VStack>
-      </Box>
+              {status}
+            </Badge>
+
+            <Box>
+              <Heading
+                size="md"
+                color="brand.forest"
+                fontFamily="heading"
+                lineClamp={1}
+              >
+                {title}
+              </Heading>
+
+              <Text
+                mt={1}
+                color="brand.sage"
+                fontSize="sm"
+                fontFamily="body"
+              >
+                {author}
+              </Text>
+
+              {stock !== undefined && (
+                <Text
+                  mt={1}
+                  color="gray.500"
+                  fontSize="xs"
+                  fontFamily="body"
+                  fontWeight="medium"
+                >
+                  {stock === 0 ? "Sin stock" : `Stock: ${stock}`}
+                </Text>
+              )}
+            </Box>
+
+            <HStack justify="space-between" align="center">
+              <Text
+                fontSize="2xl"
+                fontWeight="700"
+                color="brand.forest"
+                fontFamily="heading"
+              >
+                {price}
+              </Text>
+
+              <IconButton
+                aria-label="Agregar libro"
+                rounded="full"
+                bg="brand.forest"
+                color="brand.beige"
+                size="md"
+                transition="all 0.2s ease"
+                _hover={{
+                  bg: "brand.clay",
+                }}
+                disabled={stock === 0}
+                opacity={stock === 0 ? 0.5 : 1}
+                cursor={stock === 0 ? "not-allowed" : "pointer"}
+                onClick={
+                  stock === 0
+                    ? (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }
+                    : handleAddToCart
+                }
+              >
+                <LuPlus />
+              </IconButton>
+            </HStack>
+          </VStack>
+        </Box>
+      </Link>
     </>
   );
 }

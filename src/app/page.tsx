@@ -13,6 +13,7 @@ const books = [
     price: "$18.500",
     status: "EXCELENTE" as const,
     image: "/images/book-1.jpg",
+    stock: 5,
   },
   {
     title: "Cien años de soledad",
@@ -20,6 +21,7 @@ const books = [
     price: "$15.200",
     status: "BUEN ESTADO" as const,
     image: "/images/book-2.jpg",
+    stock: 2,
   },
   {
     title: "Rayuela",
@@ -27,6 +29,7 @@ const books = [
     price: "$21.000",
     status: "EXCELENTE" as const,
     image: "/images/book-3.jpg",
+    stock: 0,
   },
   {
     title: "Ficciones",
@@ -34,6 +37,7 @@ const books = [
     price: "$12.400",
     status: "BUEN ESTADO" as const,
     image: "/images/book-4.jpg",
+    stock: 10,
   },
 ];
 
