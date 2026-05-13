@@ -80,11 +80,11 @@ export default function CartPage() {
     const total = subtotal + shipping
 
     return (
-        <Box bg="brand.beige" minH="100vh" py={{ base: 8, md: 12 }}>
+        <Box bg="brand.beige" minH="100vh" pt={{ base: 8 }}>
             <Container maxW="7xl" px={{ base: 4, md: 6 }}>
                 {/* Header */}
-                <Flex align="baseline" gap={3} mb={8}>
-                    <Stack gap="3" mb="12">
+                <Flex align="baseline" gap={3} mb={2}>
+                    <Stack gap="3" mb="6">
                         <Heading
                             fontSize="5xl"
                             color="brand.forest"
@@ -109,10 +109,10 @@ export default function CartPage() {
                     </Stack>
                 </Flex>
 
-                <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={8}>
+                <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={6}>
                     {/* Left Column: Cart Items */}
                     <GridItem>
-                        <VStack gap={4} align="stretch" mb={8}>
+                        <VStack gap={4} align="stretch" mb={4}>
                             {cartItems.map((item) => (
                                 <Flex
                                     key={item.id}
@@ -159,21 +159,6 @@ export default function CartPage() {
                                                 <Text color="gray.600" fontSize="xs" mb={2}>
                                                     {item.author}
                                                 </Text>
-                                                <Box
-                                                    display="inline-block"
-                                                    bg="brand.sand"
-                                                    px={2}
-                                                    py={0.5}
-                                                    borderRadius="full"
-                                                >
-                                                    <Text
-                                                        fontSize="xs"
-                                                        color="brand.sage"
-                                                        fontWeight="medium"
-                                                    >
-                                                        {item.condition}
-                                                    </Text>
-                                                </Box>
                                             </Box>
                                             <Text
                                                 fontFamily="heading"
@@ -263,6 +248,7 @@ export default function CartPage() {
                                 _hover={{ bg: "brand.sand" }}
                                 fontWeight="semibold"
                                 px={4}
+                                py={2}
                                 gap={2}
                             >
                                 <LuArrowLeft /> Seguir comprando
@@ -284,7 +270,7 @@ export default function CartPage() {
                                 fontSize="2xl"
                                 color="brand.forest"
                                 mb={8}
-                                fontWeight="normal"
+                                fontWeight="bold"
                             >
                                 Resumen del pedido
                             </Heading>
@@ -292,13 +278,13 @@ export default function CartPage() {
                             <VStack gap={4} align="stretch" mb={6}>
                                 <Flex justify="space-between">
                                     <Text color="gray.600">Subtotal</Text>
-                                    <Text color="brand.forest" fontWeight="semibold">
+                                    <Text color="brand.forest" fontWeight="bold">
                                         ${subtotal.toFixed(2)}
                                     </Text>
                                 </Flex>
                                 <Flex justify="space-between">
                                     <Text color="gray.600">Envío</Text>
-                                    <Text color="brand.forest" fontWeight="semibold">
+                                    <Text color="brand.forest" fontWeight="bold">
                                         ${shipping.toFixed(2)}
                                     </Text>
                                 </Flex>
