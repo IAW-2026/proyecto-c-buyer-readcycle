@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
     Box,
     Button,
@@ -55,6 +55,20 @@ const INITIAL_CART_ITEMS = [
 
 export default function CartPage() {
     const [cartItems, setCartItems] = useState(INITIAL_CART_ITEMS)
+
+    useEffect(() => {
+        const fetchCart = async () => {
+            try {
+                const response = await fetch('/api/cart');
+                const data = await response.json();
+                console.log("Carrito del usuario logueado:", data);
+            } catch (error) {
+                console.error("Error al obtener el carrito:", error);
+            }
+        };
+
+        fetchCart();
+    }, []);
 
     const handleUpdateQuantity = (id: number, delta: number) => {
         setCartItems((prev) =>
