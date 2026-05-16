@@ -7,12 +7,13 @@ generator client {
 }
 
 model Comprador {
-  id          String      @id
-  nombre      String
-  mail        String      @unique
-  telefono    String?
-  direcciones Direccion[]
-  carritos    Carrito[]
+  id           String @id
+  name         String
+  surname      String
+  email        String @unique
+
+  direcciones  Direccion[]
+  carritos     Carrito[]
 }
 
 model Direccion {
