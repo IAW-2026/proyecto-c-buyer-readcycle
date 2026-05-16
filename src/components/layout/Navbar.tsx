@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react"
 import Image from "next/image"
 import NextLink from "next/link"
-import { LuSearch, LuShoppingCart } from "react-icons/lu"
+import { LuSearch, LuShoppingCart, LuUser } from "react-icons/lu"
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
 
 export function Navbar() {
@@ -169,7 +169,15 @@ export function Navbar() {
                   </IconButton>
                 </NextLink>
                 <Box>
-                  <UserButton />
+                  <UserButton>
+                    <UserButton.MenuItems>
+                      <UserButton.Link
+                        label="Mi Perfil"
+                        href="/profile"
+                        labelIcon={<LuUser />}
+                      />
+                    </UserButton.MenuItems>
+                  </UserButton>
                 </Box>
               </Show>
             </HStack>
