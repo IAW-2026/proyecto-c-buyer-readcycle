@@ -14,16 +14,13 @@ export default function SyncUser() {
 
   useEffect(() => {
 
-    // Clerk todavía cargando
     if (!isLoaded) return;
 
-    // Usuario no autenticado
     if (!isSignedIn) {
       alreadySynced.current = false;
       return;
     }
 
-    // Evita múltiples requests
     if (alreadySynced.current) return;
 
     alreadySynced.current = true;
