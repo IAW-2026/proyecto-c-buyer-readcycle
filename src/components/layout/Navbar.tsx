@@ -1,5 +1,7 @@
 "use client"
 
+import { useState, useEffect } from "react"
+
 import {
   Box,
   Button,
@@ -18,6 +20,17 @@ import { LuSearch, LuShoppingCart, LuUser } from "react-icons/lu"
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
 
 export function Navbar() {
+  const [userRole, setUserRole] = useState("comprador");
+
+  useEffect(() => {
+    fetch('/api/auth/role')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.role) setUserRole(data.role);
+      })
+      .catch(err => console.error(err));
+  }, []);
+
   return (
     <Box
       as="header"
@@ -53,8 +66,27 @@ export function Navbar() {
             </Link>
           </Box>
 
-          <Box flex="1" maxW={{ base: "none", md: "md", lg: "lg" }} mx="auto">
-            <Box position="relative">
+          <Box flex="1" maxW={{ base: "none", md: "md", lg: "lg" }} mx="auto" display="flex" alignItems="center" gap={4}>
+            <Show when="signed-in">
+              {userRole === "admin" && (
+                <NextLink href="/admin/users" passHref>
+                  <Button
+                    variant="solid"
+                    bg="brand.sage"
+                    color="white"
+                    size="sm"
+                    borderRadius="brand"
+                    fontFamily="heading"
+                    fontWeight="600"
+                    _hover={{ bg: "brand.forest" }}
+                    flexShrink={0}
+                  >
+                    Panel Admin
+                  </Button>
+                </NextLink>
+              )}
+            </Show>
+            <Box position="relative" flex="1">
               <Box
                 color="brand.sage"
                 left="3"
