@@ -21,7 +21,7 @@ interface ProductDetailsProps {
   author: string;
   description: string;
   price: string;
-  status: "EXCELENTE" | "BUEN ESTADO";
+  categoryName: string;
   stock?: number;
 }
 
@@ -31,10 +31,9 @@ export default function ProductDetails({
   author,
   description,
   price,
-  status,
+  categoryName,
   stock = 1,
 }: ProductDetailsProps) {
-  const isExcellent = status === "EXCELENTE";
   const { userId } = useAuth();
   const clerk = useClerk();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -156,10 +155,10 @@ export default function ProductDetails({
               fontWeight="700"
               letterSpacing="0.08em"
               textTransform="uppercase"
-              bg={isExcellent ? "brand.sage" : "brand.clay"}
+              bg="brand.forest"
               color="brand.beige"
             >
-              {status}
+              {categoryName}
             </Badge>
             <Heading as="h1" size="2xl" color="brand.forest" fontFamily="heading">
               {title}

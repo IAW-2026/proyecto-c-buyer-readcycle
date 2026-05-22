@@ -12,8 +12,13 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
+import { useState } from "react";
 
 export default function HeroBanner() {
+  const [isVisible, setIsVisible] = useState(true);
+
+  if (!isVisible) return null;
+
   return (
     <Container maxW="8xl" py={6}>
       <Box
@@ -60,7 +65,7 @@ export default function HeroBanner() {
               lineHeight="1.1"
               fontSize={{ base: "2xl", md: "4xl" }}
             >
-              Dale una segunda vida a cada historia.
+              Dale una segunda vida a las historias.
             </Heading>
 
             <Flex gap={4} wrap="wrap" py={6}>
@@ -74,22 +79,9 @@ export default function HeroBanner() {
                 _hover={{
                   bg: "brand.sand",
                 }}
+                onClick={() => setIsVisible(false)}
               >
                 Ver catálogo completo
-              </Button>
-
-              <Button
-                size="lg"
-                variant="outline"
-                color="brand.beige"
-                borderColor="rgba(249,247,242,0.35)"
-                borderRadius="full"
-                px={8}
-                _hover={{
-                  bg: "rgba(249,247,242,0.08)",
-                }}
-              >
-                Vender
               </Button>
             </Flex>
           </Stack>
