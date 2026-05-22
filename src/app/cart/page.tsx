@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
     Box,
     Button,
@@ -11,6 +11,7 @@ import {
     Heading,
     HStack,
     IconButton,
+    Image,
     Input,
     Stack,
     Text,
@@ -26,50 +27,92 @@ import {
     LuTruck,
 } from "react-icons/lu"
 
-const INITIAL_CART_ITEMS = [
-    {
-        id: 1,
-        title: "El Aleph",
-        author: "Jorge Luis Borges",
-        condition: "Excelente estado",
-        price: 18.50,
-        quantity: 1,
-    },
-    {
-        id: 2,
-        title: "Rayuela",
-        author: "Julio Cortázar",
-        condition: "Primera Edición (Colección)",
-        price: 45.00,
-        quantity: 1,
-    },
-    {
-        id: 3,
-        title: "Ficciones",
-        author: "Jorge Luis Borges",
-        condition: "Buen estado",
-        price: 22.00,
-        quantity: 1,
-    },
-]
+import { mockProducts } from "@/lib/mockProducts";
+
+type CartItemDisplay = {
+    id: string;
+    productId: string;
+    title: string;
+    author: string;
+    price: number;
+    quantity: number;
+    image: string;
+};
 
 export default function CartPage() {
-    const [cartItems, setCartItems] = useState(INITIAL_CART_ITEMS)
+    const [cartItems, setCartItems] = useState<CartItemDisplay[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const handleUpdateQuantity = (id: number, delta: number) => {
-        setCartItems((prev) =>
-            prev.map((item) => {
-                if (item.id === id) {
-                    const newQuantity = Math.max(1, item.quantity + delta)
-                    return { ...item, quantity: newQuantity }
+    useEffect(() => {
+        const fetchCart = async () => {
+            try {
+                const response = await fetch('/api/cart');
+                const data = await response.json();
+
+                if (data.success && data.carrito) {
+                    const mappedItems = data.carrito.items.map((item: any) => {
+                        const product = mockProducts.find(p => p.id === item.productId);
+                        if (!product) return null;
+
+                        return {
+                            id: item.id,
+                            productId: item.productId,
+                            title: product.title,
+                            author: `${product.seller.name} ${product.seller.surname}`,
+                            price: product.price,
+                            quantity: item.cantidad,
+                            image: product.images.find(img => img.isPrimary)?.url || product.images[0]?.url || "/images/placeholder.jpg",
+                        };
+                    }).filter(Boolean) as CartItemDisplay[];
+
+                    setCartItems(mappedItems);
                 }
-                return item
-            })
-        )
+            } catch (error) {
+                console.error("Error al obtener el carrito:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchCart();
+    }, []);
+
+    const handleUpdateQuantity = async (productId: string, delta: number) => {
+        const itemIndex = cartItems.findIndex(i => i.productId === productId);
+        if (itemIndex === -1) return;
+
+        const currentItem = cartItems[itemIndex];
+        const newQuantity = Math.max(1, currentItem.quantity + delta);
+
+        // Optimistic update
+        setCartItems(prev => prev.map(item =>
+            item.productId === productId ? { ...item, quantity: newQuantity } : item
+        ));
+
+        try {
+            await fetch('/api/cart', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, cantidad: newQuantity })
+            });
+        } catch (error) {
+            console.error("Error updating quantity:", error);
+        }
     }
 
-    const handleDelete = (id: number) => {
-        setCartItems((prev) => prev.filter((item) => item.id !== id))
+    const handleDelete = async (productId: string) => {
+        // Optimistic update
+        setCartItems(prev => prev.filter(item => item.productId !== productId));
+
+        try {
+            await fetch('/api/cart', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId })
+            });
+        } catch (error) {
+            console.error("Error deleting item:", error);
+        }
     }
 
     const subtotal = cartItems.reduce(
@@ -103,7 +146,7 @@ export default function CartPage() {
                                 color="gray.600"
                                 fontSize="lg"
                             >
-                                Tus {cartItems.length} {cartItems.length === 1 ? "libro está" : "libros están"} a un clic de distancia!
+                                {cartItems.length === 1 ? "Tu libro" : "Tus " + cartItems.length + " libros"} {cartItems.length === 1 ? "está" : "están"} a un clic de distancia!
                             </Text>
                         </Flex>
                     </Stack>
@@ -124,7 +167,7 @@ export default function CartPage() {
                                     gap={4}
                                     direction={{ base: "column", sm: "row" }}
                                 >
-                                    {/* Book Image Placeholder */}
+                                    {/* Book Image */}
                                     <Box
                                         w={{ base: "full", sm: "80px" }}
                                         h={{ base: "160px", sm: "112px" }}
@@ -138,10 +181,9 @@ export default function CartPage() {
                                         display="flex"
                                         alignItems="center"
                                         justifyContent="center"
+                                        overflow="hidden"
                                     >
-                                        <Text color="brand.sage" fontSize="xs" fontWeight="bold" opacity={0.5}>
-                                            IMAGEN
-                                        </Text>
+                                        <Image src={item.image} w="full" h="full" objectFit="cover" alt={item.title} />
                                     </Box>
 
                                     {/* Book Details */}
@@ -159,21 +201,6 @@ export default function CartPage() {
                                                 <Text color="gray.600" fontSize="xs" mb={2}>
                                                     {item.author}
                                                 </Text>
-                                                <Box
-                                                    display="inline-block"
-                                                    bg="brand.sand"
-                                                    px={2}
-                                                    py={0.5}
-                                                    borderRadius="full"
-                                                >
-                                                    <Text
-                                                        fontSize="xs"
-                                                        color="brand.sage"
-                                                        fontWeight="medium"
-                                                    >
-                                                        {item.condition}
-                                                    </Text>
-                                                </Box>
                                             </Box>
                                             <Text
                                                 fontFamily="heading"
@@ -204,7 +231,7 @@ export default function CartPage() {
                                                     color="brand.forest"
                                                     _hover={{ bg: "brand.sand" }}
                                                     borderRadius="full"
-                                                    onClick={() => handleUpdateQuantity(item.id, -1)}
+                                                    onClick={() => handleUpdateQuantity(item.productId, -1)}
                                                 >
                                                     <LuMinus />
                                                 </IconButton>
@@ -218,7 +245,7 @@ export default function CartPage() {
                                                     color="brand.forest"
                                                     _hover={{ bg: "brand.sand" }}
                                                     borderRadius="full"
-                                                    onClick={() => handleUpdateQuantity(item.id, 1)}
+                                                    onClick={() => handleUpdateQuantity(item.productId, 1)}
                                                 >
                                                     <LuPlus />
                                                 </IconButton>
@@ -229,7 +256,7 @@ export default function CartPage() {
                                                 color="red.500"
                                                 size="xs"
                                                 _hover={{ bg: "red.50" }}
-                                                onClick={() => handleDelete(item.id)}
+                                                onClick={() => handleDelete(item.productId)}
                                                 gap={1.5}
                                             >
                                                 <LuTrash2 /> Eliminar

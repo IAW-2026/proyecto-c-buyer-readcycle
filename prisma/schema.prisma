@@ -1,18 +1,20 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
+}
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 model Comprador {
-  id          String      @id
-  nombre      String
-  mail        String      @unique
-  telefono    String?
-  direcciones Direccion[]
-  carritos    Carrito[]
+  id           String @id
+  name         String
+  surname      String
+  email        String @unique
+  rol          String @default("comprador")
+
+  direcciones  Direccion[]
+  carritos     Carrito[]
 }
 
 model Direccion {

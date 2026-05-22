@@ -6,40 +6,7 @@ import HeroBanner from "@/components/home/HeroBanner";
 import BooksTabs from "@/components/home/Tabs";
 import BookCard from "@/components/home/Card";
 
-const books = [
-  {
-    title: "El Aleph",
-    author: "Jorge Luis Borges",
-    price: "$18.500",
-    status: "EXCELENTE" as const,
-    image: "/images/book-1.jpg",
-    stock: 5,
-  },
-  {
-    title: "Cien años de soledad",
-    author: "Gabriel García Márquez",
-    price: "$15.200",
-    status: "BUEN ESTADO" as const,
-    image: "/images/book-2.jpg",
-    stock: 2,
-  },
-  {
-    title: "Rayuela",
-    author: "Julio Cortázar",
-    price: "$21.000",
-    status: "EXCELENTE" as const,
-    image: "/images/book-3.jpg",
-    stock: 0,
-  },
-  {
-    title: "Ficciones",
-    author: "Jorge Luis Borges",
-    price: "$12.400",
-    status: "BUEN ESTADO" as const,
-    image: "/images/book-4.jpg",
-    stock: 10,
-  },
-];
+import { mockProducts } from "@/lib/mockProducts";
 
 export default function HomePage() {
   return (
@@ -58,8 +25,8 @@ export default function HomePage() {
           gap={6}
           py={8}
         >
-          {books.map((book) => (
-            <BookCard key={book.title} {...book} />
+          {mockProducts.map((product) => (
+            <BookCard key={product.id} product={product} />
           ))}
         </Grid>
       </Container>

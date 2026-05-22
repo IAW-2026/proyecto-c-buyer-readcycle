@@ -3,7 +3,6 @@
 "use client";
 
 import {
-  Badge,
   Box,
   Heading,
   IconButton,
@@ -18,38 +17,49 @@ import { useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import Link from "next/link";
+import { Product } from "@/lib/mockProducts";
 
 interface BookCardProps {
-  image: string;
-  title: string;
-  author: string;
-  price: string;
-  status: "EXCELENTE" | "BUEN ESTADO";
-  stock?: number;
+  product: Product;
 }
 
-export default function BookCard({
-  image,
-  title,
-  author,
-  price,
-  status,
-  stock = 1,
-}: BookCardProps) {
-  const isExcellent = status === "EXCELENTE";
+export default function BookCard({ product }: BookCardProps) {
   const { userId } = useAuth();
   const clerk = useClerk();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const author = `${product.seller.name} ${product.seller.surname}`;
+  const price = `$${product.price.toLocaleString("es-AR")}`;
+  const image = product.images.find((img) => img.isPrimary)?.url || product.images[0]?.url || "/images/placeholder.jpg";
+  const title = product.title;
+  const stock = product.stock;
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!userId) {
       setIsModalOpen(true);
       return;
     }
-    // Lógica para agregar al carrito cuando el usuario sí está logueado
-    console.log("Agregado al carrito:", title);
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: product.id, cantidad: 1 })
+      });
+      if (response.ok) {
+        console.log("Agregado al carrito:", title);
+      } else {
+        console.error("Error al agregar al carrito");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -157,21 +167,6 @@ export default function BookCard({
 
           {/* Contenido */}
           <VStack align="stretch" gap={4} px={5} pb={5}>
-            <Badge
-              alignSelf="flex-start"
-              px={3}
-              py={1}
-              borderRadius="full"
-              fontSize="10px"
-              fontWeight="700"
-              letterSpacing="0.08em"
-              textTransform="uppercase"
-              bg={isExcellent ? "brand.sage" : "brand.clay"}
-              color="brand.beige"
-            >
-              {status}
-            </Badge>
-
             <Box>
               <Heading
                 size="md"
@@ -224,11 +219,11 @@ export default function BookCard({
                 _hover={{
                   bg: "brand.clay",
                 }}
-                disabled={stock === 0}
-                opacity={stock === 0 ? 0.5 : 1}
-                cursor={stock === 0 ? "not-allowed" : "pointer"}
+                disabled={stock === 0 || isLoading}
+                opacity={stock === 0 || isLoading ? 0.5 : 1}
+                cursor={stock === 0 ? "not-allowed" : isLoading ? "wait" : "pointer"}
                 onClick={
-                  stock === 0
+                  stock === 0 || isLoading
                     ? (e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -236,7 +231,7 @@ export default function BookCard({
                     : handleAddToCart
                 }
               >
-                <LuPlus />
+                {isLoading ? <Text fontSize="xs" fontWeight="bold">...</Text> : <LuPlus />}
               </IconButton>
             </HStack>
           </VStack>
