@@ -3,22 +3,36 @@
 "use client";
 
 import { Tabs, Container } from "@chakra-ui/react";
+import { useRouter } from "next/navigation";
 
 const categories = [
   "Todos los libros",
-  "Novedades",
   "Ficción",
   "Clásicos",
-  "Historia",
   "Ensayo",
   "Poesía",
 ];
 
-export default function BooksTabs() {
+interface BooksTabsProps {
+  selectedCategory: string;
+}
+
+export default function BooksTabs({ selectedCategory }: BooksTabsProps) {
+  const router = useRouter();
+
+  const handleCategoryChange = (value: string) => {
+    if (value === "Todos los libros") {
+      router.push("/");
+    } else {
+      router.push(`/?category=${encodeURIComponent(value)}`);
+    }
+  };
+
   return (
     <Container maxW="container.lg" centerContent py={6}>
       <Tabs.Root
-        defaultValue="Todos los libros"
+        value={selectedCategory}
+        onValueChange={(details) => handleCategoryChange(details.value)}
         variant="plain"
         width="auto"
       >

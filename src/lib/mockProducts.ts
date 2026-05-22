@@ -31,9 +31,24 @@ export type Product = {
 };
 
 // Mock de categorías
-const mockCategory = {
-  id: "cat_1",
-  name: "Literatura",
+const mockCategoryFiccion = {
+  id: "cat_ficcion",
+  name: "Ficción",
+};
+
+const mockCategoryClasicos = {
+  id: "cat_clasicos",
+  name: "Clásicos",
+};
+
+const mockCategoryEnsayo = {
+  id: "cat_ensayo",
+  name: "Ensayo",
+};
+
+const mockCategoryPoesia = {
+  id: "cat_poesia",
+  name: "Poesía",
 };
 
 // Mock de vendedor
@@ -63,8 +78,8 @@ export const mockProducts: Product[] = [
         createdAt: new Date(),
       },
     ],
-    categoryId: mockCategory.id,
-    category: mockCategory,
+    categoryId: mockCategoryClasicos.id,
+    category: mockCategoryClasicos,
     createdAt: new Date(),
     updatedAt: new Date(),
   },
@@ -86,8 +101,8 @@ export const mockProducts: Product[] = [
         createdAt: new Date(),
       },
     ],
-    categoryId: mockCategory.id,
-    category: mockCategory,
+    categoryId: mockCategoryFiccion.id,
+    category: mockCategoryFiccion,
     createdAt: new Date(),
     updatedAt: new Date(),
   },
@@ -109,8 +124,8 @@ export const mockProducts: Product[] = [
         createdAt: new Date(),
       },
     ],
-    categoryId: mockCategory.id,
-    category: mockCategory,
+    categoryId: mockCategoryFiccion.id,
+    category: mockCategoryFiccion,
     createdAt: new Date(),
     updatedAt: new Date(),
   },
@@ -132,8 +147,8 @@ export const mockProducts: Product[] = [
         createdAt: new Date(),
       },
     ],
-    categoryId: mockCategory.id,
-    category: mockCategory,
+    categoryId: mockCategoryClasicos.id,
+    category: mockCategoryClasicos,
     createdAt: new Date(),
     updatedAt: new Date(),
   },

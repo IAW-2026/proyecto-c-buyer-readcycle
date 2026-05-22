@@ -2,18 +2,10 @@
 
 import { Box, Grid, Heading } from "@chakra-ui/react";
 import BookCard from "@/components/home/Card";
-
-interface Book {
-  title: string;
-  author: string;
-  price: string;
-  status: "EXCELENTE" | "BUEN ESTADO";
-  image: string;
-  stock?: number;
-}
+import { Product } from "@/lib/mockProducts";
 
 interface SellerProductsProps {
-  books: Book[];
+  books: Product[];
   sellerName?: string;
 }
 
@@ -34,9 +26,10 @@ export default function SellerProducts({ books, sellerName = "este vendedor" }: 
         gap={6}
       >
         {books.map((book) => (
-          <BookCard key={book.title} {...book} />
+          <BookCard key={book.id} product={book} />
         ))}
       </Grid>
     </Box>
   );
 }
+

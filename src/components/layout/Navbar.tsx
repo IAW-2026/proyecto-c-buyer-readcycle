@@ -18,9 +18,46 @@ import Image from "next/image"
 import NextLink from "next/link"
 import { LuSearch, LuShoppingCart, LuUser } from "react-icons/lu"
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 
 export function Navbar() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [userRole, setUserRole] = useState("comprador");
+
+  // Sincronizar el input si cambia la query de búsqueda en la URL
+  useEffect(() => {
+    setSearchQuery(searchParams.get("search") || "");
+  }, [searchParams]);
+
+  // Actualizar la URL a medida que el usuario escribe (Debounce de 200ms)
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      const urlSearch = searchParams.get("search") || "";
+      const trimmedQuery = searchQuery.trim();
+
+      if (trimmedQuery !== urlSearch.trim()) {
+        const isHome = pathname === "/";
+        if (isHome) {
+          const params = new URLSearchParams(window.location.search);
+          if (trimmedQuery) {
+            params.set("search", trimmedQuery);
+          } else {
+            params.delete("search");
+          }
+          router.replace(`/?${params.toString()}`, { scroll: false });
+        } else if (trimmedQuery) {
+          // Si estamos en otra página, redirigimos al home con la búsqueda
+          router.push(`/?search=${encodeURIComponent(trimmedQuery)}`);
+        }
+      }
+    }, 200);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery, pathname, router, searchParams]);
 
   useEffect(() => {
     fetch('/api/auth/role')
@@ -94,6 +131,7 @@ export function Navbar() {
                 top="50%"
                 transform="translateY(-50%)"
                 pointerEvents="none"
+                zIndex="2"
               >
                 <LuSearch />
               </Box>
@@ -116,6 +154,18 @@ export function Navbar() {
                 }}
                 _placeholder={{ color: "brand.sage" }}
                 variant="outline"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const value = searchQuery.trim();
+                    if (value) {
+                      router.push(`/?search=${encodeURIComponent(value)}`);
+                    } else {
+                      router.push("/");
+                    }
+                  }
+                }}
               />
             </Box>
           </Box>
@@ -139,20 +189,25 @@ export function Navbar() {
                     </Button>
                   </Menu.Trigger>
                   <Menu.Content position="absolute" top="100%" left="50%" transform="translateX(-50%)" mt="2" bg="white" borderColor="brand.sand" borderRadius="brand" boxShadow="md" py="2" zIndex="popover">
-                    <Menu.Item value="ficcion" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      Ficción
+                    <Menu.Item value="ficcion" asChild _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
+                      <NextLink href="/?category=Ficción" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
+                        Ficción
+                      </NextLink>
                     </Menu.Item>
-                    <Menu.Item value="no-ficcion" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      No Ficción
+                    <Menu.Item value="clasicos" asChild _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
+                      <NextLink href="/?category=Clásicos" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
+                        Clásicos
+                      </NextLink>
                     </Menu.Item>
-                    <Menu.Item value="infantil" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      Infantil
+                    <Menu.Item value="ensayo" asChild _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
+                      <NextLink href="/?category=Ensayo" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
+                        Ensayo
+                      </NextLink>
                     </Menu.Item>
-                    <Menu.Item value="juvenil" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      Juvenil
-                    </Menu.Item>
-                    <Menu.Item value="academico" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      Académico
+                    <Menu.Item value="poesia" asChild _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
+                      <NextLink href="/?category=Poesía" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
+                        Poesía
+                      </NextLink>
                     </Menu.Item>
                   </Menu.Content>
                 </Menu.Root>

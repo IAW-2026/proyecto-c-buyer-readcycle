@@ -139,7 +139,7 @@ export default function BookCard({ product }: BookCardProps) {
           </Box>
         </Portal>
       )}
-      <Link href="/product/1" style={{ display: 'block', textDecoration: 'none' }}>
+      <Link href={`/product/${product.id}`} style={{ display: 'block', textDecoration: 'none' }}>
         <Box
           bg="white"
           borderRadius="brand"
