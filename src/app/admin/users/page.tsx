@@ -452,9 +452,9 @@ export default function AdminUsersPage() {
                             <VStack gap={4} align="stretch" mb={6}>
                                 <Flex justify="space-between">
                                     <Text color="gray.600">Total Usuarios</Text>
-                                    <Text color="brand.forest" fontWeight="bold" fontSize="lg">
+                                    <Badge bg="brand.clay" color="white" borderRadius="full" px={2}>
                                         {users.length}
-                                    </Text>
+                                    </Badge>
                                 </Flex>
                                 <Flex justify="space-between">
                                     <Text color="gray.600">Administradores</Text>

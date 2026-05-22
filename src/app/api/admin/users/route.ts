@@ -82,6 +82,50 @@ export async function PUT(req: NextRequest) {
             return Response.json({ error: "ID de usuario es requerido" }, { status: 400 });
         }
 
+        const client = await clerkClient();
+
+        // 1. Obtener datos actuales del usuario en Clerk
+        const clerkUser = await client.users.getUser(id);
+
+        // 2. Actualizar nombre y apellido en Clerk si cambiaron
+        const clerkUpdateParams: { firstName?: string; lastName?: string } = {};
+        if (name) clerkUpdateParams.firstName = name;
+        if (surname !== undefined) clerkUpdateParams.lastName = surname;
+
+        if (Object.keys(clerkUpdateParams).length > 0) {
+            await client.users.updateUser(id, clerkUpdateParams);
+        }
+
+        // 3. Actualizar email en Clerk si cambió
+        if (email) {
+            const primaryEmailObj = clerkUser.emailAddresses.find(
+                (addr) => addr.id === clerkUser.primaryEmailAddressId
+            );
+            const currentEmail = primaryEmailObj?.emailAddress;
+
+            if (currentEmail && email !== currentEmail) {
+                // Crear el nuevo email en Clerk, marcarlo verificado y primario
+                const newEmailObj = await client.emailAddresses.createEmailAddress({
+                    userId: id,
+                    emailAddress: email,
+                    verified: true,
+                    primary: true,
+                });
+
+                // Eliminar los emails antiguos
+                for (const oldEmail of clerkUser.emailAddresses) {
+                    if (oldEmail.id !== newEmailObj.id) {
+                        try {
+                            await client.emailAddresses.deleteEmailAddress(oldEmail.id);
+                        } catch (delError) {
+                            console.error(`Error deleting old email address ${oldEmail.id}:`, delError);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Actualizar base de datos
         const updatedUser = await prisma.comprador.update({
             where: { id },
             data: {
@@ -92,9 +136,9 @@ export async function PUT(req: NextRequest) {
             }
         });
         return Response.json({ success: true, user: updatedUser });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error updating user:", error);
-        return Response.json({ error: "Error al actualizar usuario" }, { status: 500 });
+        return Response.json({ error: error.message || "Error al actualizar usuario" }, { status: 500 });
     }
 }
 
@@ -115,12 +159,29 @@ export async function DELETE(req: NextRequest) {
             return Response.json({ error: "No puedes eliminarte a ti mismo" }, { status: 400 });
         }
 
+        const client = await clerkClient();
+
+        // 1. Eliminar de Clerk
+        try {
+            await client.users.deleteUser(id);
+        } catch (clerkError: any) {
+            console.error("Error al eliminar usuario de Clerk:", clerkError);
+            // Si el usuario no existe en Clerk (404 / resource_not_found), permitimos que continúe
+            // para que se pueda limpiar la base de datos local y evitar bloquear al administrador.
+            const isNotFoundError = clerkError.status === 404 || 
+                                   (clerkError.errors && clerkError.errors.some((e: any) => e.code === 'resource_not_found'));
+            if (!isNotFoundError) {
+                throw clerkError;
+            }
+        }
+
+        // 2. Eliminar de la base de datos
         await prisma.comprador.delete({
             where: { id }
         });
         return Response.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error deleting user:", error);
-        return Response.json({ error: "Error al eliminar usuario" }, { status: 500 });
+        return Response.json({ error: error.message || "Error al eliminar usuario" }, { status: 500 });
     }
 }
