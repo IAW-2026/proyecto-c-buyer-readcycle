@@ -10,12 +10,11 @@ import {
   Text,
   VStack,
   HStack,
-  Button,
-  Portal,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { LuPlus } from "react-icons/lu";
-import { useAuth, useClerk } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
+import AuthModal from "@/components/layout/AuthModal";
 import Link from "next/link";
 import { Product } from "@/lib/mockProducts";
 
@@ -25,7 +24,6 @@ interface BookCardProps {
 
 export default function BookCard({ product }: BookCardProps) {
   const { userId } = useAuth();
-  const clerk = useClerk();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,7 +40,7 @@ export default function BookCard({ product }: BookCardProps) {
       setIsModalOpen(true);
       return;
     }
-    
+
     setIsLoading(true);
     try {
       const response = await fetch('/api/cart', {
@@ -64,81 +62,7 @@ export default function BookCard({ product }: BookCardProps) {
 
   return (
     <>
-      {isModalOpen && (
-        <Portal>
-          <Box
-            position="fixed"
-            inset="0"
-            zIndex="1400"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Box
-              position="absolute"
-              inset="0"
-              bg="blackAlpha.600"
-              backdropFilter="blur(3px)"
-              onClick={() => setIsModalOpen(false)}
-            />
-            <VStack
-              position="relative"
-              bg="brand.beige"
-              p={8}
-              borderRadius="brand"
-              boxShadow="2xl"
-              maxW="sm"
-              w="90%"
-              gap={5}
-              zIndex="1401"
-              border="1px solid"
-              borderColor="brand.sand"
-            >
-              <Heading size="md" color="brand.forest" textAlign="center" fontFamily="heading">
-                ¿Ya tienes una cuenta?
-              </Heading>
-              <Text textAlign="center" color="brand.sage" fontSize="sm" fontFamily="body">
-                Para agregar productos al carrito necesitas iniciar sesión o registrarte de forma gratuita.
-              </Text>
-              <HStack w="full" gap={3} mt={2}>
-                <Button
-                  flex="1"
-                  variant="outline"
-                  borderColor="brand.sage"
-                  color="brand.forest"
-                  borderRadius="brand"
-                  fontFamily="heading"
-                  fontWeight="600"
-                  _hover={{ bg: "brand.sand" }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsModalOpen(false);
-                    clerk.openSignIn();
-                  }}
-                >
-                  Ingresar
-                </Button>
-                <Button
-                  flex="1"
-                  bg="brand.sage"
-                  color="white"
-                  borderRadius="brand"
-                  fontFamily="heading"
-                  fontWeight="600"
-                  _hover={{ bg: "brand.forest" }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsModalOpen(false);
-                    clerk.openSignUp();
-                  }}
-                >
-                  Registrarse
-                </Button>
-              </HStack>
-            </VStack>
-          </Box>
-        </Portal>
-      )}
+      <AuthModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       <Link href={`/product/${product.id}`} style={{ display: 'block', textDecoration: 'none' }}>
         <Box
           bg="white"
@@ -225,9 +149,9 @@ export default function BookCard({ product }: BookCardProps) {
                 onClick={
                   stock === 0 || isLoading
                     ? (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
                     : handleAddToCart
                 }
               >
