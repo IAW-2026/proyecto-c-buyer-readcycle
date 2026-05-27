@@ -16,6 +16,7 @@ import { useAuth } from "@clerk/nextjs";
 import AuthModal from "@/components/layout/AuthModal";
 
 interface ProductDetailsProps {
+  productId: string;
   image: string;
   title: string;
   author: string;
@@ -26,6 +27,7 @@ interface ProductDetailsProps {
 }
 
 export default function ProductDetails({
+  productId,
   image,
   title,
   author,
@@ -36,13 +38,31 @@ export default function ProductDetails({
 }: ProductDetailsProps) {
   const { userId } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!userId) {
       setIsModalOpen(true);
       return;
     }
-    console.log("Agregado al carrito:", title);
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, cantidad: 1 })
+      });
+      if (response.ok) {
+        console.log("Agregado al carrito:", title);
+        window.dispatchEvent(new Event('cart-updated'));
+      } else {
+        console.error("Error al agregar al carrito");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -115,12 +135,12 @@ export default function ProductDetails({
               fontFamily="heading"
               borderRadius="brand"
               _hover={{ bg: "brand.clay" }}
-              disabled={stock === 0}
-              opacity={stock === 0 ? 0.5 : 1}
-              cursor={stock === 0 ? "not-allowed" : "pointer"}
-              onClick={stock === 0 ? undefined : handleAddToCart}
+              disabled={stock === 0 || isLoading}
+              opacity={stock === 0 || isLoading ? 0.5 : 1}
+              cursor={stock === 0 ? "not-allowed" : isLoading ? "wait" : "pointer"}
+              onClick={stock === 0 || isLoading ? undefined : handleAddToCart}
             >
-              {stock === 0 ? "Sin stock" : "Agregar al Carrito"}
+              {isLoading ? "Cargando..." : stock === 0 ? "Sin stock" : "Agregar al Carrito"}
             </Button>
           </Box>
         </VStack>

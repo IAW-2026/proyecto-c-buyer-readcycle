@@ -27,7 +27,7 @@ export default function BookCard({ product }: BookCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const author = `${product.seller.name} ${product.seller.surname}`;
+  const seller = `${product.seller.name} ${product.seller.surname}`;
   const price = `$${product.price.toLocaleString("es-AR")}`;
   const image = product.images.find((img) => img.isPrimary)?.url || product.images[0]?.url || "/images/placeholder.jpg";
   const title = product.title;
@@ -50,6 +50,7 @@ export default function BookCard({ product }: BookCardProps) {
       });
       if (response.ok) {
         console.log("Agregado al carrito:", title);
+        window.dispatchEvent(new Event('cart-updated'));
       } else {
         console.error("Error al agregar al carrito");
       }
@@ -107,7 +108,7 @@ export default function BookCard({ product }: BookCardProps) {
                 fontSize="sm"
                 fontFamily="body"
               >
-                {author}
+                Vendedor: {seller}
               </Text>
 
               {stock !== undefined && (

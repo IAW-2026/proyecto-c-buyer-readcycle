@@ -90,11 +90,14 @@ export default function CartPage() {
         ));
 
         try {
-            await fetch('/api/cart', {
+            const response = await fetch('/api/cart', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ productId, cantidad: newQuantity })
             });
+            if (response.ok) {
+                window.dispatchEvent(new Event('cart-updated'));
+            }
         } catch (error) {
             console.error("Error updating quantity:", error);
         }
@@ -105,11 +108,14 @@ export default function CartPage() {
         setCartItems(prev => prev.filter(item => item.productId !== productId));
 
         try {
-            await fetch('/api/cart', {
+            const response = await fetch('/api/cart', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ productId })
             });
+            if (response.ok) {
+                window.dispatchEvent(new Event('cart-updated'));
+            }
         } catch (error) {
             console.error("Error deleting item:", error);
         }

@@ -20,7 +20,7 @@ export default function HeroBanner() {
   if (!isVisible) return null;
 
   return (
-    <Container maxW="8xl" py={6}>
+    <Container maxW="8xl" pt={6} pb={2}>
       <Box
         position="relative"
         overflow="hidden"
@@ -48,7 +48,6 @@ export default function HeroBanner() {
           bg="rgba(44,58,39,0.75)"
         />
 
-        {/* Content */}
         <Flex
           position="relative"
           zIndex={2}
@@ -58,17 +57,17 @@ export default function HeroBanner() {
           px={{ base: 8, md: 16 }}
           py={4}
         >
-          <Stack gap={2}>
+          <Stack gap={4}>
             <Heading
               color="brand.beige"
               fontWeight="400"
-              lineHeight="1.1"
+              lineHeight="1"
               fontSize={{ base: "2xl", md: "4xl" }}
             >
               Dale una segunda vida a las historias.
             </Heading>
 
-            <Flex gap={4} wrap="wrap" py={6}>
+            <Flex gap={4} wrap="wrap">
               <Button
                 size="lg"
                 bg="brand.beige"

@@ -29,9 +29,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   // 1. Filtrado inicial por categoría si no es "Todos los libros"
   let filteredProducts = selectedCategory !== "Todos los libros"
     ? mockProducts.filter(
-        (product) =>
-          product.category.name.toLowerCase() === selectedCategory.toLowerCase()
-      )
+      (product) =>
+        product.category.name.toLowerCase() === selectedCategory.toLowerCase()
+    )
     : mockProducts;
 
   // 2. Filtrado y ordenamiento con prioridades si hay búsqueda activa
@@ -71,6 +71,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
         <BooksTabs selectedCategory={selectedCategory} />
 
+        {/* Separador Estético */}
+        <Box borderBottom="3px solid" borderColor="brand.sand" mb={4} />
+
         <Grid
           templateColumns={{
             base: "1fr",
@@ -78,7 +81,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             xl: "repeat(4,1fr)",
           }}
           gap={6}
-          py={8}
+          pt={4}
+          pb={8}
         >
           {filteredProducts.map((product) => (
             <BookCard key={product.id} product={product} />

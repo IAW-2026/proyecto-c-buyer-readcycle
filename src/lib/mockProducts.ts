@@ -14,6 +14,7 @@ export type Product = {
     surname: string;
     email: string;
   };
+
   images: {
     id: string;
     url: string;
@@ -21,11 +22,13 @@ export type Product = {
     productId: string;
     createdAt: Date;
   }[];
+
   categoryId: string;
   category: {
     id: string;
     name: string;
   };
+
   createdAt: Date;
   updatedAt: Date;
 };
@@ -57,6 +60,13 @@ const mockSeller = {
   name: "Juan",
   surname: "Pérez",
   email: "juan@example.com",
+};
+
+const mockSeller2 = {
+  id: "user_2",
+  name: "María",
+  surname: "Gómez",
+  email: "maria@example.com",
 };
 
 export const mockProducts: Product[] = [
@@ -113,8 +123,8 @@ export const mockProducts: Product[] = [
     price: 21000,
     stock: 0,
     weight: 0.5,
-    sellerId: mockSeller.id,
-    seller: mockSeller,
+    sellerId: mockSeller2.id,
+    seller: mockSeller2,
     images: [
       {
         id: "img_3",

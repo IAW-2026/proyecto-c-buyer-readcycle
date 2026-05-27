@@ -29,7 +29,7 @@ export default function BooksTabs({ selectedCategory }: BooksTabsProps) {
   };
 
   return (
-    <Container maxW="container.lg" centerContent py={6}>
+    <Container maxW="container.lg" centerContent pt={2} pb={4}>
       <Tabs.Root
         value={selectedCategory}
         onValueChange={(details) => handleCategoryChange(details.value)}

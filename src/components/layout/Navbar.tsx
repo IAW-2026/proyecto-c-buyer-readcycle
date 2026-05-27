@@ -17,7 +17,7 @@ import {
 import Image from "next/image"
 import NextLink from "next/link"
 import { LuSearch, LuShoppingCart, LuUser } from "react-icons/lu"
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
+import { Show, SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 
 export function Navbar() {
@@ -27,6 +27,54 @@ export function Navbar() {
   const initialSearch = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [userRole, setUserRole] = useState("comprador");
+
+  const { userId } = useAuth();
+  const [cartCount, setCartCount] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const fetchCartCount = async () => {
+    try {
+      const response = await fetch('/api/cart');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.carrito) {
+          const totalItems = data.carrito.items.reduce((acc: number, item: any) => acc + item.cantidad, 0);
+          setCartCount(totalItems);
+        } else {
+          setCartCount(0);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching cart count:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (userId) {
+      fetchCartCount();
+    } else {
+      setCartCount(0);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    const handleCartUpdate = () => {
+      fetchCartCount();
+      setIsAnimating(true);
+    };
+
+    window.addEventListener('cart-updated', handleCartUpdate);
+    return () => {
+      window.removeEventListener('cart-updated', handleCartUpdate);
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (isAnimating) {
+      const t = setTimeout(() => setIsAnimating(false), 500);
+      return () => clearTimeout(t);
+    }
+  }, [isAnimating]);
 
   // Sincronizar el input si cambia la query de búsqueda en la URL
   useEffect(() => {
@@ -243,17 +291,43 @@ export function Navbar() {
                 </SignUpButton>
               </Show>
               <Show when="signed-in">
-                <NextLink href="/cart" passHref>
-                  <IconButton
-                    aria-label="Ver carrito"
-                    bg="rgba(0, 0, 0, 0.06)"
-                    color="brand.forest"
-                    borderRadius="brand"
-                    size="sm"
-                    _hover={{ bg: "rgba(0, 0, 0, 0.12)" }}
-                  >
-                    <LuShoppingCart />
-                  </IconButton>
+                <NextLink href="/cart" passHref style={{ textDecoration: 'none' }}>
+                  <Box position="relative" display="inline-block">
+                    <IconButton
+                      aria-label="Ver carrito"
+                      bg="rgba(0, 0, 0, 0.06)"
+                      color="brand.forest"
+                      borderRadius="brand"
+                      size="sm"
+                      _hover={{ bg: "rgba(0, 0, 0, 0.12)" }}
+                    >
+                      <LuShoppingCart />
+                    </IconButton>
+                    {cartCount > 0 && (
+                      <Box
+                        position="absolute"
+                        bottom="-6px"
+                        right="-6px"
+                        bg="brand.clay"
+                        color="white"
+                        borderRadius="full"
+                        minW="18px"
+                        h="18px"
+                        px="4px"
+                        fontSize="10px"
+                        fontWeight="bold"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        boxShadow="sm"
+                        zIndex="1"
+                        pointerEvents="none"
+                        className={isAnimating ? "cart-bounce-animation" : ""}
+                      >
+                        {cartCount}
+                      </Box>
+                    )}
+                  </Box>
                 </NextLink>
                 <Box>
                   <UserButton>

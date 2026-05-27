@@ -33,7 +33,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const sellerName = `${product.seller.name} ${product.seller.surname}`;
 
   // Obtenemos los demás productos del mismo vendedor (excluyendo el actual)
-  const sellerBooks = mockProducts.filter((p) => p.sellerId === product.sellerId && p.id !== product.id);
+  const sellerBooks = mockProducts.filter((p) => p.seller.id === product.seller.id && p.id !== product.id);
 
   return (
     <Box bg="brand.beige" minH="100vh" pt={2} pb={8}>
@@ -51,6 +51,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </NextLink>
         {/* Componente de Detalles del Producto */}
         <ProductDetails
+          productId={product.id}
           image={image}
           title={title}
           author={author}
