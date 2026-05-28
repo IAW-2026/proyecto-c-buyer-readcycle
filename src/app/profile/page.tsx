@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import {
     Box,
     Button,
@@ -26,8 +27,19 @@ const MOCK_ORDERS = [
 ]
 
 export default function ProfilePage() {
+    const [orders, setOrders] = useState<any[]>(MOCK_ORDERS);
 
-
+    useEffect(() => {
+        const storedOrders = localStorage.getItem('readcycle_orders');
+        if (storedOrders) {
+            try {
+                const parsed = JSON.parse(storedOrders);
+                setOrders([...parsed, ...MOCK_ORDERS]);
+            } catch (e) {
+                console.error("Error al cargar pedidos guardados:", e);
+            }
+        }
+    }, []);
 
     return (
         <Box bg="brand.beige" minH="100vh" py={{ base: 8, md: 12 }}>
@@ -75,7 +87,7 @@ export default function ProfilePage() {
                         </Heading>
 
                         <VStack gap={4} align="stretch" mb={6}>
-                            {MOCK_ORDERS.map((order) => (
+                            {orders.map((order) => (
                                 <OrderCard key={order.id} order={order} />
                             ))}
                         </VStack>

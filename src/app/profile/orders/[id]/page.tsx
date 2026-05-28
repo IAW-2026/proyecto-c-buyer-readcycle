@@ -1,4 +1,8 @@
-import { Box, Button, Container, Heading, Flex, Text, Grid, GridItem, VStack, HStack, Badge, Image } from "@chakra-ui/react"
+"use client"
+
+import * as React from "react"
+import { useState, useEffect } from "react"
+import { Box, Button, Container, Heading, Flex, Text, Grid, GridItem, VStack, HStack, Badge, Image, Spinner } from "@chakra-ui/react"
 import { LuArrowLeft, LuPackage, LuCheck, LuClock, LuTruck, LuCreditCard, LuMapPin, LuDollarSign } from "react-icons/lu"
 import NextLink from "next/link"
 import { notFound } from "next/navigation"
@@ -157,9 +161,42 @@ const SHIPPING_STEPS = [
     { key: "Entregado", label: "Entregado", desc: "El paquete ha sido entregado en tu domicilio" }
 ]
 
-export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
-    const { id } = await params
-    const order = MOCK_ORDER_DETAILS[id]
+export default function OrderDetailPage({ params }: OrderDetailPageProps) {
+    const { id } = React.use(params)
+    const [order, setOrder] = useState<typeof MOCK_ORDER_DETAILS[string] | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() => {
+        if (MOCK_ORDER_DETAILS[id]) {
+            setOrder(MOCK_ORDER_DETAILS[id])
+            setIsLoading(false)
+            return
+        }
+
+        const storedDetails = localStorage.getItem('readcycle_order_details')
+        if (storedDetails) {
+            try {
+                const parsed = JSON.parse(storedDetails)
+                if (parsed[id]) {
+                    setOrder(parsed[id])
+                    setIsLoading(false)
+                    return
+                }
+            } catch (e) {
+                console.error("Error reading order details from localStorage:", e)
+            }
+        }
+
+        setIsLoading(false)
+    }, [id])
+
+    if (isLoading) {
+        return (
+            <Flex justify="center" align="center" minH="100vh" bg="brand.beige">
+                <Spinner size="xl" color="brand.sage" />
+            </Flex>
+        )
+    }
 
     if (!order) {
         notFound()

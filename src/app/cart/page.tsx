@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import {
     Box,
     Button,
@@ -40,8 +41,59 @@ type CartItemDisplay = {
 };
 
 export default function CartPage() {
+    const router = useRouter();
     const [cartItems, setCartItems] = useState<CartItemDisplay[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+    const handleCheckout = async () => {
+        if (cartItems.length === 0) return;
+
+        setIsCheckingOut(true);
+        try {
+            const response = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Error al procesar la compra');
+            }
+
+            const data = await response.json();
+            if (data.success && data.order) {
+                // Notificar al Navbar para actualizar contador a 0
+                window.dispatchEvent(new Event('cart-updated'));
+
+                // Guardar orden resumida en localStorage para listarla en el Perfil
+                const currentOrders = JSON.parse(localStorage.getItem('readcycle_orders') || '[]');
+                const newOrderListItem = {
+                    id: data.order.id,
+                    date: data.order.date,
+                    status: data.order.status,
+                    total: data.order.total,
+                    items: data.order.items.reduce((acc: number, item: any) => acc + item.quantity, 0),
+                };
+                localStorage.setItem('readcycle_orders', JSON.stringify([newOrderListItem, ...currentOrders]));
+
+                // Guardar detalle completo de la orden en localStorage
+                const currentOrderDetails = JSON.parse(localStorage.getItem('readcycle_order_details') || '{}');
+                currentOrderDetails[data.order.id] = data.order;
+                localStorage.setItem('readcycle_order_details', JSON.stringify(currentOrderDetails));
+
+                // Redirigir a la pantalla de éxito
+                router.push(`/checkout/success?orderId=${data.order.id}`);
+            }
+        } catch (error: any) {
+            console.error("Error al procesar el checkout:", error);
+            alert(error.message || "Hubo un problema al procesar tu compra. Por favor, intenta de nuevo.");
+        } finally {
+            setIsCheckingOut(false);
+        }
+    };
 
     useEffect(() => {
         const fetchCart = async () => {
@@ -366,8 +418,10 @@ export default function CartPage() {
                                 _hover={{ bg: "#c66a4e" }}
                                 mb={8}
                                 h="14"
+                                onClick={handleCheckout}
+                                disabled={cartItems.length === 0 || isLoading || isCheckingOut}
                             >
-                                Finalizar compra
+                                {isCheckingOut ? "Procesando..." : "Finalizar compra"}
                             </Button>
 
                             <VStack align="start" gap={3}>
