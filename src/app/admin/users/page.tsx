@@ -8,12 +8,11 @@ import {
     Flex,
     Heading,
     HStack,
-    IconButton,
     Input,
     Stack,
     Text,
     Badge,
-    Spinner,
+    Skeleton,
     VStack,
     Grid,
     GridItem
@@ -145,9 +144,11 @@ export default function AdminUsersPage() {
                         </Heading>
 
                         {isLoading ? (
-                            <Flex justify="center" py={12}>
-                                <Spinner color="brand.sage" size="xl" />
-                            </Flex>
+                            <VStack gap={4} align="stretch">
+                                <Skeleton h="100px" borderRadius="brand" />
+                                <Skeleton h="100px" borderRadius="brand" />
+                                <Skeleton h="100px" borderRadius="brand" />
+                            </VStack>
                         ) : users.length === 0 ? (
                             <Flex
                                 bg="white"
@@ -273,3 +274,4 @@ export default function AdminUsersPage() {
         </Box>
     )
 }
+

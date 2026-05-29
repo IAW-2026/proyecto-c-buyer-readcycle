@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import {
     Box,
     Button,
@@ -9,25 +10,15 @@ import {
     Grid,
     GridItem,
     Heading,
-    HStack,
-    IconButton,
-    Image,
-    Input,
     Stack,
     Text,
-    VStack,
 } from "@chakra-ui/react"
 import NextLink from "next/link"
-import {
-    LuArrowLeft,
-    LuMinus,
-    LuPlus,
-    LuShieldCheck,
-    LuTrash2,
-    LuTruck,
-} from "react-icons/lu"
+import { LuArrowLeft } from "react-icons/lu"
 
-import { mockProducts } from "@/lib/mockProducts";
+import { mockProducts } from "@/lib/mockProducts"
+import CartItemList from "@/components/cart/CartItemList"
+import CartSummary from "@/components/cart/CartSummary"
 
 type CartItemDisplay = {
     id: string;
@@ -40,8 +31,59 @@ type CartItemDisplay = {
 };
 
 export default function CartPage() {
+    const router = useRouter();
     const [cartItems, setCartItems] = useState<CartItemDisplay[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+    const handleCheckout = async () => {
+        if (cartItems.length === 0) return;
+
+        setIsCheckingOut(true);
+        try {
+            const response = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Error al procesar la compra');
+            }
+
+            const data = await response.json();
+            if (data.success && data.order) {
+                // Notificar al Navbar para actualizar contador a 0
+                window.dispatchEvent(new Event('cart-updated'));
+
+                // Guardar orden resumida en localStorage para listarla en el Perfil
+                const currentOrders = JSON.parse(localStorage.getItem('readcycle_orders') || '[]');
+                const newOrderListItem = {
+                    id: data.order.id,
+                    date: data.order.date,
+                    status: data.order.status,
+                    total: data.order.total,
+                    items: data.order.items.reduce((acc: number, item: any) => acc + item.quantity, 0),
+                };
+                localStorage.setItem('readcycle_orders', JSON.stringify([newOrderListItem, ...currentOrders]));
+
+                // Guardar detalle completo de la orden en localStorage
+                const currentOrderDetails = JSON.parse(localStorage.getItem('readcycle_order_details') || '{}');
+                currentOrderDetails[data.order.id] = data.order;
+                localStorage.setItem('readcycle_order_details', JSON.stringify(currentOrderDetails));
+
+                // Redirigir a la pantalla de éxito
+                router.push(`/checkout/success?orderId=${data.order.id}`);
+            }
+        } catch (error: any) {
+            console.error("Error al procesar el checkout:", error);
+            alert(error.message || "Hubo un problema al procesar tu compra. Por favor, intenta de nuevo.");
+        } finally {
+            setIsCheckingOut(false);
+        }
+    };
 
     useEffect(() => {
         const fetchCart = async () => {
@@ -161,133 +203,11 @@ export default function CartPage() {
                 <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={6}>
                     {/* Left Column: Cart Items */}
                     <GridItem>
-                        <VStack gap={4} align="stretch" mb={4}>
-                            {cartItems.map((item) => (
-                                <Flex
-                                    key={item.id}
-                                    bg="white"
-                                    border="1px solid"
-                                    borderColor="brand.sand"
-                                    borderRadius="brand"
-                                    p={3}
-                                    gap={4}
-                                    direction={{ base: "column", sm: "row" }}
-                                >
-                                    {/* Book Image */}
-                                    <Box
-                                        w={{ base: "full", sm: "80px" }}
-                                        h={{ base: "160px", sm: "112px" }}
-                                        bgGradient="to-br"
-                                        gradientFrom="brand.sand"
-                                        gradientTo="brand.beige"
-                                        borderRadius="md"
-                                        flexShrink={0}
-                                        border="1px solid"
-                                        borderColor="blackAlpha.100"
-                                        display="flex"
-                                        alignItems="center"
-                                        justifyContent="center"
-                                        overflow="hidden"
-                                    >
-                                        <Image src={item.image} w="full" h="full" objectFit="cover" alt={item.title} />
-                                    </Box>
-
-                                    {/* Book Details */}
-                                    <Flex direction="column" flex={1} justify="space-between">
-                                        <Flex justify="space-between" align="flex-start" gap={3}>
-                                            <Box>
-                                                <Text
-                                                    fontFamily="heading"
-                                                    fontSize="lg"
-                                                    color="brand.forest"
-                                                    mb={1}
-                                                >
-                                                    {item.title}
-                                                </Text>
-                                                <Text color="gray.600" fontSize="xs" mb={2}>
-                                                    {item.author}
-                                                </Text>
-                                            </Box>
-                                            <Text
-                                                fontFamily="heading"
-                                                fontSize="xl"
-                                                color="brand.forest"
-                                            >
-                                                ${item.price.toFixed(2)}
-                                            </Text>
-                                        </Flex>
-
-                                        {/* Actions: Quantity & Delete */}
-                                        <Flex
-                                            justify="space-between"
-                                            align="center"
-                                            mt={{ base: 3, sm: 0 }}
-                                        >
-                                            <Flex
-                                                align="center"
-                                                border="1px solid"
-                                                borderColor="brand.sand"
-                                                borderRadius="full"
-                                                p={0.5}
-                                            >
-                                                <IconButton
-                                                    aria-label="Disminuir cantidad"
-                                                    variant="ghost"
-                                                    size="xs"
-                                                    color="brand.forest"
-                                                    _hover={{ bg: "brand.sand" }}
-                                                    borderRadius="full"
-                                                    onClick={() => handleUpdateQuantity(item.productId, -1)}
-                                                >
-                                                    <LuMinus />
-                                                </IconButton>
-                                                <Text px={3} fontSize="sm" color="brand.forest" fontWeight="medium">
-                                                    {item.quantity}
-                                                </Text>
-                                                <IconButton
-                                                    aria-label="Aumentar cantidad"
-                                                    variant="ghost"
-                                                    size="xs"
-                                                    color="brand.forest"
-                                                    _hover={{ bg: "brand.sand" }}
-                                                    borderRadius="full"
-                                                    onClick={() => handleUpdateQuantity(item.productId, 1)}
-                                                >
-                                                    <LuPlus />
-                                                </IconButton>
-                                            </Flex>
-
-                                            <Button
-                                                variant="ghost"
-                                                color="red.500"
-                                                size="xs"
-                                                _hover={{ bg: "red.50" }}
-                                                onClick={() => handleDelete(item.productId)}
-                                                gap={1.5}
-                                            >
-                                                <LuTrash2 /> Eliminar
-                                            </Button>
-                                        </Flex>
-                                    </Flex>
-                                </Flex>
-                            ))}
-
-                            {cartItems.length === 0 && (
-                                <Flex
-                                    bg="white"
-                                    border="1px solid"
-                                    borderColor="brand.sand"
-                                    borderRadius="brand"
-                                    p={8}
-                                    justify="center"
-                                    align="center"
-                                    direction="column"
-                                    gap={4}
-                                >
-                                    <Text color="brand.sage" fontSize="lg" fontWeight="semibold">Tu carrito está vacío</Text>
-                                </Flex>
-                            )}
-                        </VStack>
+                        <CartItemList
+                            items={cartItems}
+                            onUpdateQuantity={handleUpdateQuantity}
+                            onDelete={handleDelete}
+                        />
 
                         <NextLink href="/" passHref>
                             <Button
@@ -306,92 +226,18 @@ export default function CartPage() {
 
                     {/* Right Column: Order Summary */}
                     <GridItem>
-                        <Box
-                            border="1px solid"
-                            borderColor="brand.sand"
-                            borderRadius="brand"
-                            p={{ base: 6, md: 8 }}
-                            bg="transparent"
-                        >
-                            <Heading
-                                fontFamily="heading"
-                                fontSize="2xl"
-                                color="brand.forest"
-                                mb={8}
-                                fontWeight="bold"
-                            >
-                                Resumen del pedido
-                            </Heading>
-
-                            <VStack gap={4} align="stretch" mb={6}>
-                                <Flex justify="space-between">
-                                    <Text color="gray.600">Subtotal</Text>
-                                    <Text color="brand.forest" fontWeight="bold">
-                                        ${subtotal.toFixed(2)}
-                                    </Text>
-                                </Flex>
-                                <Flex justify="space-between">
-                                    <Text color="gray.600">Envío</Text>
-                                    <Text color="brand.forest" fontWeight="bold">
-                                        ${shipping.toFixed(2)}
-                                    </Text>
-                                </Flex>
-                            </VStack>
-
-                            <Box borderBottom="1px solid" borderColor="brand.sand" mb={6} />
-
-                            <Flex justify="space-between" align="center" mb={8}>
-                                <Text fontSize="xl" color="brand.forest">
-                                    Total
-                                </Text>
-                                <Text
-                                    fontSize="4xl"
-                                    fontFamily="heading"
-                                    color="brand.forest"
-                                    fontWeight="bold"
-                                >
-                                    ${total.toFixed(2)}
-                                </Text>
-                            </Flex>
-
-                            <Button
-                                w="full"
-                                size="lg"
-                                bg="brand.clay"
-                                color="white"
-                                borderRadius="brand"
-                                fontFamily="heading"
-                                fontSize="lg"
-                                fontWeight="semibold"
-                                _hover={{ bg: "#c66a4e" }}
-                                mb={8}
-                                h="14"
-                            >
-                                Finalizar compra
-                            </Button>
-
-                            <VStack align="start" gap={3}>
-                                <Flex align="center" gap={3}>
-                                    <Box color="brand.forest">
-                                        <LuTruck size={20} />
-                                    </Box>
-                                    <Text fontSize="sm" color="gray.600">
-                                        Envío gratis en compras mayores a $150
-                                    </Text>
-                                </Flex>
-                                <Flex align="center" gap={3}>
-                                    <Box color="brand.forest">
-                                        <LuShieldCheck size={20} />
-                                    </Box>
-                                    <Text fontSize="sm" color="gray.600">
-                                        Pago seguro y encriptado
-                                    </Text>
-                                </Flex>
-                            </VStack>
-                        </Box>
+                        <CartSummary
+                            subtotal={subtotal}
+                            shipping={shipping}
+                            total={total}
+                            onCheckout={handleCheckout}
+                            isCheckoutDisabled={cartItems.length === 0 || isLoading || isCheckingOut}
+                            isCheckingOut={isCheckingOut}
+                        />
                     </GridItem>
                 </Grid>
             </Container>
         </Box>
     )
 }
+
