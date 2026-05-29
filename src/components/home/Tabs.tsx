@@ -4,13 +4,11 @@
 
 import { Tabs, Container } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
+import { mockCategories } from "@/lib/mockCategories";
 
 const categories = [
   "Todos los libros",
-  "Ficción",
-  "Clásicos",
-  "Ensayo",
-  "Poesía",
+  ...mockCategories.map((c) => c.name),
 ];
 
 interface BooksTabsProps {

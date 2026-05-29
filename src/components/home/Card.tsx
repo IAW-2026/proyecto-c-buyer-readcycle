@@ -32,6 +32,7 @@ export default function BookCard({ product }: BookCardProps) {
   const image = product.images.find((img) => img.isPrimary)?.url || product.images[0]?.url || "/images/placeholder.jpg";
   const title = product.title;
   const stock = product.stock;
+  const author = product.author;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -99,7 +100,7 @@ export default function BookCard({ product }: BookCardProps) {
                 fontFamily="heading"
                 lineClamp={1}
               >
-                {title}
+                {title} - {author}
               </Heading>
 
               <Text
