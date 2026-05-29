@@ -19,6 +19,7 @@ import NextLink from "next/link"
 import { LuSearch, LuShoppingCart, LuUser } from "react-icons/lu"
 import { Show, SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import { mockCategories } from "@/lib/mockCategories"
 
 export function Navbar() {
   const router = useRouter();
@@ -237,26 +238,25 @@ export function Navbar() {
                     </Button>
                   </Menu.Trigger>
                   <Menu.Content position="absolute" top="100%" left="50%" transform="translateX(-50%)" mt="2" bg="white" borderColor="brand.sand" borderRadius="brand" boxShadow="md" py="2" zIndex="popover">
-                    <Menu.Item value="ficcion" asChild _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      <NextLink href="/?category=Ficción" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
-                        Ficción
-                      </NextLink>
-                    </Menu.Item>
-                    <Menu.Item value="clasicos" asChild _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      <NextLink href="/?category=Clásicos" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
-                        Clásicos
-                      </NextLink>
-                    </Menu.Item>
-                    <Menu.Item value="ensayo" asChild _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      <NextLink href="/?category=Ensayo" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
-                        Ensayo
-                      </NextLink>
-                    </Menu.Item>
-                    <Menu.Item value="poesia" asChild _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      <NextLink href="/?category=Poesía" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
-                        Poesía
-                      </NextLink>
-                    </Menu.Item>
+                    {mockCategories.map((category) => (
+                      <Menu.Item
+                        key={category.id}
+                        value={category.id}
+                        asChild
+                        _hover={{ bg: "brand.sand" }}
+                        px="4"
+                        py="2"
+                        cursor="pointer"
+                        color="brand.forest"
+                      >
+                        <NextLink
+                          href={`/?category=${encodeURIComponent(category.name)}`}
+                          style={{ textDecoration: 'none', display: 'block', width: '100%' }}
+                        >
+                          {category.name}
+                        </NextLink>
+                      </Menu.Item>
+                    ))}
                   </Menu.Content>
                 </Menu.Root>
               </Box>
