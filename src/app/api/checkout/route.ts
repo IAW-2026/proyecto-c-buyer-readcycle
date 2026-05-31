@@ -68,7 +68,7 @@ export async function POST() {
         }
 
         const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-        const shippingCost = 5.00; // Costo de envío base
+        const shippingCost = subtotal < 50000 ? 15000 : 0; // Costo de envío base
         const total = subtotal + shippingCost;
 
         // Borrar todos los items del carrito (vaciado del carrito)

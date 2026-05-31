@@ -167,7 +167,7 @@ export default function CartPage() {
         (acc, item) => acc + item.price * item.quantity,
         0
     )
-    const shipping = cartItems.length > 0 ? 5.00 : 0
+    const shipping = cartItems.length > 0 && subtotal < 50000 ? 15000 : 0
     const total = subtotal + shipping
 
     return (

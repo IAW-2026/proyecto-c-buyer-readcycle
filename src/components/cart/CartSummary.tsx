@@ -93,7 +93,7 @@ export default function CartSummary({
                         <LuTruck size={20} />
                     </Box>
                     <Text fontSize="sm" color="gray.600">
-                        Envío gratis en compras mayores a $150
+                        Envío gratis en compras mayores a $50.000
                     </Text>
                 </Flex>
                 <Flex align="center" gap={3}>
