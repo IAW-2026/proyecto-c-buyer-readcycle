@@ -7,18 +7,26 @@ export default function SyncUser() {
 
   const {
     isLoaded,
-    isSignedIn
+    isSignedIn,
+    user
   } = useUser();
 
   const alreadySynced = useRef(false);
+  const lastUserId = useRef<string | null>(null);
 
   useEffect(() => {
 
     if (!isLoaded) return;
 
-    if (!isSignedIn) {
+    if (!isSignedIn || !user) {
       alreadySynced.current = false;
+      lastUserId.current = null;
       return;
+    }
+
+    if (lastUserId.current !== user.id) {
+      alreadySynced.current = false;
+      lastUserId.current = user.id;
     }
 
     if (alreadySynced.current) return;
@@ -36,7 +44,9 @@ export default function SyncUser() {
           }
         );
 
-        if (!response.ok) {
+        if (response.ok) {
+          window.dispatchEvent(new CustomEvent('user-synced'));
+        } else {
           console.error(
             "Error sincronizando usuario"
           );
@@ -54,7 +64,7 @@ export default function SyncUser() {
 
     syncUser();
 
-  }, [isLoaded, isSignedIn]);
+  }, [isLoaded, isSignedIn, user?.id]);
 
   return null;
 }
