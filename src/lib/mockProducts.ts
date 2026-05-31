@@ -64,7 +64,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_1",
-        url: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop",
+        url: "https://lenguajeclaro.com/wp-content/uploads/El-Aleph.webp",
         isPrimary: true,
         productId: "prod_1",
         createdAt: new Date(),
@@ -88,7 +88,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_2",
-        url: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=800&auto=format&fit=crop",
+        url: "https://imgv2-1-f.scribdassets.com/img/word_document/843446828/original/bdf392138f/1?v=1",
         isPrimary: true,
         productId: "prod_2",
         createdAt: new Date(),
@@ -112,7 +112,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_3",
-        url: "https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=800&auto=format&fit=crop",
+        url: "https://caroferrara.com/wp-content/uploads/2020/09/Rayuela-1.jpg",
         isPrimary: true,
         productId: "prod_3",
         createdAt: new Date(),
@@ -136,7 +136,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_4",
-        url: "https://images.unsplash.com/photo-1535905557558-afc4877a26fc?q=80&w=800&auto=format&fit=crop",
+        url: "https://cdn.livriz.com/media/mediaspace/F9AFB48D-741D-4834-B760-F59344EEFF34/45/d5d6f19f-fbd6-4a4b-8423-912ce2ebaec0/mediamodifier99ba31c279c.webp",
         isPrimary: true,
         productId: "prod_4",
         createdAt: new Date(),
@@ -160,7 +160,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_5",
-        url: "https://images.unsplash.com/photo-1456680415309-7756f7e8a9f6?q=80&w=800&auto=format&fit=crop",
+        url: "https://www.edicontinente.com.ar/image/titulos/9788466347518.jpg",
         isPrimary: true,
         productId: "prod_5",
         createdAt: new Date(),
@@ -184,7 +184,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_6",
-        url: "https://images.unsplash.com/photo-1614315585800-48208f2f2162?q=80&w=800&auto=format&fit=crop",
+        url: "https://caroferrara.com/wp-content/uploads/2025/09/Dune-1.jpg",
         isPrimary: true,
         productId: "prod_6",
         createdAt: new Date(),
@@ -208,7 +208,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_7",
-        url: "https://images.unsplash.com/photo-1608889175250-c3b0c1667d3a?q=80&w=800&auto=format&fit=crop",
+        url: "https://cdn.kobo.com/book-images/a821b502-0d07-4921-ac14-e431625d04e7/1200/1200/False/the-hobbit-illustrated-by-alan-lee.jpg",
         isPrimary: true,
         productId: "prod_7",
         createdAt: new Date(),
@@ -232,7 +232,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_8",
-        url: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?q=80&w=800&auto=format&fit=crop",
+        url: "https://m.media-amazon.com/images/I/71mP5hPPyZL.jpg",
         isPrimary: true,
         productId: "prod_8",
         createdAt: new Date(),
@@ -256,7 +256,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_9",
-        url: "https://images.unsplash.com/photo-1505664194779-8beaceb93744?q=80&w=800&auto=format&fit=crop",
+        url: "https://acdn-us.mitiendanube.com/stores/004/008/965/products/img_7160-d5a3657644fe8e662817376613316272-1024-1024.webp",
         isPrimary: true,
         productId: "prod_9",
         createdAt: new Date(),
@@ -280,7 +280,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_10",
-        url: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=800&auto=format&fit=crop",
+        url: "https://www.mentesliberadas.com/wp-content/uploads/2012/11/fahrenheit-451-web.webp",
         isPrimary: true,
         productId: "prod_10",
         createdAt: new Date(),
@@ -304,7 +304,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_11",
-        url: "https://images.unsplash.com/photo-1629196914375-f7e48f4777dd?q=80&w=800&auto=format&fit=crop",
+        url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSC65LB8xzskAjPNeX55ieVJypqqGdfPkoiMw&s",
         isPrimary: true,
         productId: "prod_11",
         createdAt: new Date(),
@@ -328,7 +328,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_12",
-        url: "https://images.unsplash.com/photo-1633477189709-6694176d17fb?q=80&w=800&auto=format&fit=crop",
+        url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9A9Y12EIRrBDvzebRWd0ELcAWTemjbOxWjw&s",
         isPrimary: true,
         productId: "prod_12",
         createdAt: new Date(),
@@ -352,7 +352,7 @@ export const mockProducts: Product[] = [
     images: [
       {
         id: "img_13",
-        url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop",
+        url: "https://resources.sanborns.com.mx/imagenes-sanborns-ii/1200/9786079377373.jpg",
         isPrimary: true,
         productId: "prod_13",
         createdAt: new Date(),
@@ -360,54 +360,6 @@ export const mockProducts: Product[] = [
     ],
     categoryId: mockCategoryEnsayo.id,
     category: mockCategoryEnsayo,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "prod_14",
-    title: "El señor de los anillos: La comunidad del anillo",
-    author: "J.R.R. Tolkien",
-    description: "Tomo I de la saga más épica de la fantasía.",
-    price: 21500,
-    stock: 9,
-    weight: 0.65,
-    sellerId: mockSeller3.id,
-    seller: mockSeller3,
-    images: [
-      {
-        id: "img_14",
-        url: "https://images.unsplash.com/photo-1517770413964-df8ca61194a6?q=80&w=800&auto=format&fit=crop",
-        isPrimary: true,
-        productId: "prod_14",
-        createdAt: new Date(),
-      },
-    ],
-    categoryId: mockCategoryFantasia.id,
-    category: mockCategoryFantasia,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "prod_15",
-    title: "Ficciones",
-    author: "Jorge Luis Borges",
-    description: "Libro de cuentos que incluye 'La biblioteca de Babel'.",
-    price: 13000,
-    stock: 1,
-    weight: 0.25,
-    sellerId: mockSeller2.id,
-    seller: mockSeller2,
-    images: [
-      {
-        id: "img_15",
-        url: "https://images.unsplash.com/photo-1495640388908-05fa85288e61?q=80&w=800&auto=format&fit=crop",
-        isPrimary: true,
-        productId: "prod_15",
-        createdAt: new Date(),
-      },
-    ],
-    categoryId: mockCategoryClasicos.id,
-    category: mockCategoryClasicos,
     createdAt: new Date(),
     updatedAt: new Date(),
   },
