@@ -2,12 +2,12 @@
 
 import * as React from "react"
 import { useState, useEffect } from "react"
-import { Box, Button, Container, Heading, Flex, Text, Grid, GridItem, VStack, HStack, Badge, Skeleton } from "@chakra-ui/react"
+import { Box, Button, Container, Heading, Flex, Text, Grid, GridItem, VStack, HStack, Badge, Skeleton, Spinner } from "@chakra-ui/react"
 import { LuArrowLeft, LuPackage, LuCheck, LuClock, LuTruck, LuMapPin, LuDollarSign } from "react-icons/lu"
 import NextLink from "next/link"
 import { notFound } from "next/navigation"
 
-import { MOCK_ORDER_DETAILS } from "@/lib/mockOrders"
+import { MOCK_ORDER_DETAILS, OrderDetail } from "@/lib/mockOrders"
 import ShippingTimeline from "@/components/profile/ShippingTimeline"
 import OrderItemsList from "@/components/profile/OrderItemsList"
 
@@ -44,9 +44,37 @@ const SHIPPING_STEPS = [
     { key: "Entregado", label: "Entregado", desc: "El paquete ha sido entregado en tu domicilio" }
 ]
 
-export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
-    const { id } = await params
-    const order = MOCK_ORDER_DETAILS[id]
+export default function OrderDetailPage({ params }: OrderDetailPageProps) {
+    const { id } = React.use(params)
+    const [order, setOrder] = useState<OrderDetail | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() => {
+        if (MOCK_ORDER_DETAILS[id]) {
+            setOrder(MOCK_ORDER_DETAILS[id])
+        } else {
+            const storedDetails = localStorage.getItem('readcycle_order_details')
+            if (storedDetails) {
+                try {
+                    const parsed = JSON.parse(storedDetails)
+                    if (parsed[id]) {
+                        setOrder(parsed[id])
+                    }
+                } catch (e) {
+                    console.error("Error al leer detalles del pedido:", e)
+                }
+            }
+        }
+        setIsLoading(false)
+    }, [id])
+
+    if (isLoading) {
+        return (
+            <Flex justify="center" align="center" minH="100vh" bg="brand.beige">
+                <Spinner size="xl" color="brand.sage" />
+            </Flex>
+        )
+    }
 
     if (!order) {
         notFound()

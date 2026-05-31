@@ -85,8 +85,8 @@ export default function BookCard({ product }: BookCardProps) {
               src={image}
               alt={title}
               w="100%"
-              h="200px"
-              objectFit="cover"
+              h="300px"
+              objectFit="contain"
               borderRadius="brand"
             />
           </Box>
