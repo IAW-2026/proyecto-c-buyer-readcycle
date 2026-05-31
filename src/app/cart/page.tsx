@@ -142,8 +142,6 @@ export default function CartPage() {
 
         const currentItem = cartItems[itemIndex];
         const newQuantity = Math.max(1, currentItem.quantity + delta);
-
-        // Optimistic update
         setCartItems(prev => prev.map(item =>
             item.productId === productId ? { ...item, quantity: newQuantity } : item
         ));
@@ -163,7 +161,6 @@ export default function CartPage() {
     }
 
     const handleDelete = async (productId: string) => {
-        // Optimistic update
         setCartItems(prev => prev.filter(item => item.productId !== productId));
 
         try {
@@ -190,7 +187,6 @@ export default function CartPage() {
     return (
         <Box bg="brand.beige" minH="100vh" pt={{ base: 8 }}>
             <Container maxW="7xl" px={{ base: 4, md: 6 }}>
-                {/* Header */}
                 <Flex align="baseline" gap={3} mb={2}>
                     <Stack gap="3" mb="6">
                         <Heading

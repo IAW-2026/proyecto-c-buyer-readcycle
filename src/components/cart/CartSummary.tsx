@@ -44,7 +44,6 @@ export default function CartSummary({
                 Resumen del pedido
             </Heading>
 
-            {/* Componente Envío a: */}
             <Box mb={6} p={4} border="1px solid" borderColor="brand.sand" borderRadius="brand" bg="white">
                 <Text fontSize="xs" fontWeight="bold" color="gray.500" mb={1} textTransform="uppercase">
                     Envío a:

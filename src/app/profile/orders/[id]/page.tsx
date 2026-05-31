@@ -17,7 +17,6 @@ interface OrderDetailPageProps {
     }>;
 }
 
-// Helpers for Status Colors and Icons
 const getStatusBadgeConfig = (status: string) => {
     switch (status) {
         case "Entregado": return { icon: LuCheck, color: "green.600", bg: "green.50", label: "Entregado" }
@@ -36,7 +35,6 @@ const getPaymentBadgeConfig = (status: string) => {
     }
 }
 
-// Define the steps for shipping tracking
 const SHIPPING_STEPS = [
     { key: "Pendiente", label: "Confirmado", desc: "Tu pedido ha sido recibido" },
     { key: "Preparando pedido", label: "Preparando", desc: "El vendedor está empaquetando tus libros" },
@@ -87,7 +85,6 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
     return (
         <Box bg="brand.beige" minH="100vh" py={{ base: 8, md: 12 }}>
             <Container maxW="7xl" px={{ base: 4, md: 6 }}>
-                {/* Back button */}
                 <NextLink href="/profile" passHref>
                     <Button
                         variant="ghost"
@@ -103,7 +100,6 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                     </Button>
                 </NextLink>
 
-                {/* Header Section */}
                 <Box bg="white" border="1px solid" borderColor="brand.sand" borderRadius="brand" p={6} mb={8}>
                     <Flex direction={{ base: "column", md: "row" }} justify="space-between" align={{ base: "start", md: "center" }} gap={4}>
                         <VStack align="start" gap={1}>
@@ -129,13 +125,10 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                     </Flex>
                 </Box>
 
-                {/* Main Content Layout */}
                 <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={8}>
 
-                    {/* Left Column: Products & Shipping Timeline */}
                     <GridItem>
                         <VStack gap={8} align="stretch">
-                            {/* Products Section */}
                             <Box bg="white" border="1px solid" borderColor="brand.sand" borderRadius="brand" p={6}>
                                 <Heading fontSize="xl" color="brand.forest" mb={6} fontWeight="semibold">
                                     Productos en esta orden
@@ -143,7 +136,6 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                                 <OrderItemsList items={order.items} />
                             </Box>
 
-                            {/* Shipping Timeline Section */}
                             <Box bg="white" border="1px solid" borderColor="brand.sand" borderRadius="brand" p={6}>
                                 <Heading fontSize="xl" color="brand.forest" mb={6} fontWeight="semibold">
                                     Estado del envío
@@ -153,10 +145,8 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                         </VStack>
                     </GridItem>
 
-                    {/* Right Column: Address and Payment Info */}
                     <GridItem>
                         <VStack gap={8} align="stretch">
-                            {/* Cost Summary Card */}
                             <Box bg="white" border="1px solid" borderColor="brand.sand" borderRadius="brand" p={6}>
                                 <Heading fontSize="xl" color="brand.forest" mb={6} fontWeight="semibold">
                                     Resumen del pago
@@ -197,7 +187,6 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                                 </VStack>
                             </Box>
 
-                            {/* Shipping Details Card */}
                             <Box bg="white" border="1px solid" borderColor="brand.sand" borderRadius="brand" p={6}>
                                 <Heading fontSize="xl" color="brand.forest" mb={6} fontWeight="semibold">
                                     Detalles de entrega

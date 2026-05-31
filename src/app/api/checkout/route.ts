@@ -80,7 +80,7 @@ export async function POST(request: Request) {
 
         // Generar un ID de orden aleatorio
         const orderId = `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
-        
+
         // Formatear fecha
         const now = new Date();
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];

@@ -1,4 +1,3 @@
-// components/BookCard.tsx
 
 "use client";
 
@@ -79,7 +78,6 @@ export default function BookCard({ product }: BookCardProps) {
           }}
           _focus={{ outline: "none" }}
         >
-          {/* Imagen */}
           <Box p={3}>
             <Image
               src={image}
@@ -91,7 +89,6 @@ export default function BookCard({ product }: BookCardProps) {
             />
           </Box>
 
-          {/* Contenido */}
           <VStack align="stretch" gap={4} px={5} pb={5}>
             <Box>
               <Heading
