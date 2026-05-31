@@ -29,7 +29,7 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [userRole, setUserRole] = useState("comprador");
 
-  const { userId } = useAuth();
+  const { userId, getToken } = useAuth();
   const [cartCount, setCartCount] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -109,13 +109,40 @@ export function Navbar() {
   }, [searchQuery, pathname, router, searchParams]);
 
   useEffect(() => {
-    fetch('/api/auth/role')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.role) setUserRole(data.role);
-      })
-      .catch(err => console.error(err));
-  }, []);
+    if (!userId) {
+      setUserRole("comprador");
+      return;
+    }
+
+    const fetchRole = async () => {
+      try {
+        const token = await getToken();
+        const headers: Record<string, string> = {
+          'cache-control': 'no-cache',
+        };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        const res = await fetch(`/api/auth/role?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.role) setUserRole(data.role);
+        }
+      } catch (err) {
+        console.error("Error fetching user role:", err);
+      }
+    };
+
+    fetchRole();
+
+    window.addEventListener('user-synced', fetchRole);
+    return () => {
+      window.removeEventListener('user-synced', fetchRole);
+    };
+  }, [userId]);
 
   return (
     <Box
