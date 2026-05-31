@@ -17,10 +17,96 @@ import {
 import Image from "next/image"
 import NextLink from "next/link"
 import { LuSearch, LuShoppingCart, LuUser } from "react-icons/lu"
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
+import { Show, SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import { mockCategories } from "@/lib/mockCategories"
 
 export function Navbar() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [userRole, setUserRole] = useState("comprador");
+
+  const { userId } = useAuth();
+  const [cartCount, setCartCount] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const fetchCartCount = async () => {
+    try {
+      const response = await fetch('/api/cart');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.carrito) {
+          const totalItems = data.carrito.items.reduce((acc: number, item: any) => acc + item.cantidad, 0);
+          setCartCount(totalItems);
+        } else {
+          setCartCount(0);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching cart count:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (userId) {
+      fetchCartCount();
+    } else {
+      setCartCount(0);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    const handleCartUpdate = () => {
+      fetchCartCount();
+      setIsAnimating(true);
+    };
+
+    window.addEventListener('cart-updated', handleCartUpdate);
+    return () => {
+      window.removeEventListener('cart-updated', handleCartUpdate);
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (isAnimating) {
+      const t = setTimeout(() => setIsAnimating(false), 500);
+      return () => clearTimeout(t);
+    }
+  }, [isAnimating]);
+
+  // Sincronizar el input si cambia la query de búsqueda en la URL
+  useEffect(() => {
+    setSearchQuery(searchParams.get("search") || "");
+  }, [searchParams]);
+
+  // Actualizar la URL a medida que el usuario escribe (Debounce de 200ms)
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      const urlSearch = searchParams.get("search") || "";
+      const trimmedQuery = searchQuery.trim();
+
+      if (trimmedQuery !== urlSearch.trim()) {
+        const isHome = pathname === "/";
+        if (isHome) {
+          const params = new URLSearchParams(window.location.search);
+          if (trimmedQuery) {
+            params.set("search", trimmedQuery);
+          } else {
+            params.delete("search");
+          }
+          router.replace(`/?${params.toString()}`, { scroll: false });
+        } else if (trimmedQuery) {
+          // Si estamos en otra página, redirigimos al home con la búsqueda
+          router.push(`/?search=${encodeURIComponent(trimmedQuery)}`);
+        }
+      }
+    }, 200);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery, pathname, router, searchParams]);
 
   useEffect(() => {
     fetch('/api/auth/role')
@@ -94,6 +180,7 @@ export function Navbar() {
                 top="50%"
                 transform="translateY(-50%)"
                 pointerEvents="none"
+                zIndex="2"
               >
                 <LuSearch />
               </Box>
@@ -116,6 +203,18 @@ export function Navbar() {
                 }}
                 _placeholder={{ color: "brand.sage" }}
                 variant="outline"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const value = searchQuery.trim();
+                    if (value) {
+                      router.push(`/?search=${encodeURIComponent(value)}`);
+                    } else {
+                      router.push("/");
+                    }
+                  }
+                }}
               />
             </Box>
           </Box>
@@ -139,21 +238,25 @@ export function Navbar() {
                     </Button>
                   </Menu.Trigger>
                   <Menu.Content position="absolute" top="100%" left="50%" transform="translateX(-50%)" mt="2" bg="white" borderColor="brand.sand" borderRadius="brand" boxShadow="md" py="2" zIndex="popover">
-                    <Menu.Item value="ficcion" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      Ficción
-                    </Menu.Item>
-                    <Menu.Item value="no-ficcion" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      No Ficción
-                    </Menu.Item>
-                    <Menu.Item value="infantil" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      Infantil
-                    </Menu.Item>
-                    <Menu.Item value="juvenil" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      Juvenil
-                    </Menu.Item>
-                    <Menu.Item value="academico" _hover={{ bg: "brand.sand" }} px="4" py="2" cursor="pointer" color="brand.forest">
-                      Académico
-                    </Menu.Item>
+                    {mockCategories.map((category) => (
+                      <Menu.Item
+                        key={category.id}
+                        value={category.id}
+                        asChild
+                        _hover={{ bg: "brand.sand" }}
+                        px="4"
+                        py="2"
+                        cursor="pointer"
+                        color="brand.forest"
+                      >
+                        <NextLink
+                          href={`/?category=${encodeURIComponent(category.name)}`}
+                          style={{ textDecoration: 'none', display: 'block', width: '100%' }}
+                        >
+                          {category.name}
+                        </NextLink>
+                      </Menu.Item>
+                    ))}
                   </Menu.Content>
                 </Menu.Root>
               </Box>
@@ -188,17 +291,43 @@ export function Navbar() {
                 </SignUpButton>
               </Show>
               <Show when="signed-in">
-                <NextLink href="/cart" passHref>
-                  <IconButton
-                    aria-label="Ver carrito"
-                    bg="rgba(0, 0, 0, 0.06)"
-                    color="brand.forest"
-                    borderRadius="brand"
-                    size="sm"
-                    _hover={{ bg: "rgba(0, 0, 0, 0.12)" }}
-                  >
-                    <LuShoppingCart />
-                  </IconButton>
+                <NextLink href="/cart" passHref style={{ textDecoration: 'none' }}>
+                  <Box position="relative" display="inline-block">
+                    <IconButton
+                      aria-label="Ver carrito"
+                      bg="rgba(0, 0, 0, 0.06)"
+                      color="brand.forest"
+                      borderRadius="brand"
+                      size="sm"
+                      _hover={{ bg: "rgba(0, 0, 0, 0.12)" }}
+                    >
+                      <LuShoppingCart />
+                    </IconButton>
+                    {cartCount > 0 && (
+                      <Box
+                        position="absolute"
+                        bottom="-6px"
+                        right="-6px"
+                        bg="brand.clay"
+                        color="white"
+                        borderRadius="full"
+                        minW="18px"
+                        h="18px"
+                        px="4px"
+                        fontSize="10px"
+                        fontWeight="bold"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        boxShadow="sm"
+                        zIndex="1"
+                        pointerEvents="none"
+                        className={isAnimating ? "cart-bounce-animation" : ""}
+                      >
+                        {cartCount}
+                      </Box>
+                    )}
+                  </Box>
                 </NextLink>
                 <Box>
                   <UserButton>
