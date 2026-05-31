@@ -2,8 +2,10 @@ import { auth } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
 import { mockProducts } from '@/lib/mockProducts';
 
-export async function POST() {
+export async function POST(request: Request) {
     try {
+        const body = await request.json().catch(() => ({}));
+        const shippingMethod = body.shippingMethod || "domicilio";
         const { userId } = await auth();
 
         if (!userId) {
@@ -68,7 +70,7 @@ export async function POST() {
         }
 
         const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-        const shippingCost = subtotal < 50000 ? 15000 : 0; // Costo de envío base
+        const shippingCost = subtotal >= 50000 ? 0 : (shippingMethod === "sucursal" ? 10000 : 15000);
         const total = subtotal + shippingCost;
 
         // Borrar todos los items del carrito (vaciado del carrito)

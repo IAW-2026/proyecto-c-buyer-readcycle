@@ -35,6 +35,8 @@ export default function CartPage() {
     const [cartItems, setCartItems] = useState<CartItemDisplay[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCheckingOut, setIsCheckingOut] = useState(false);
+    const [shippingMethod, setShippingMethod] = useState<"domicilio" | "sucursal">("domicilio");
+    const [mainAddress, setMainAddress] = useState<any>(null);
 
     const handleCheckout = async () => {
         if (cartItems.length === 0) return;
@@ -46,6 +48,7 @@ export default function CartPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                body: JSON.stringify({ shippingMethod }),
             });
 
             if (!response.ok) {
@@ -116,7 +119,21 @@ export default function CartPage() {
             }
         };
 
+        const fetchAddress = async () => {
+            try {
+                const res = await fetch("/api/buyer/address");
+                const data = await res.json();
+                if (data.success && data.direcciones) {
+                    const main = data.direcciones.find((addr: any) => addr.esPrincipal) || data.direcciones[0];
+                    setMainAddress(main || null);
+                }
+            } catch (error) {
+                console.error("Error al obtener direcciones:", error);
+            }
+        };
+
         fetchCart();
+        fetchAddress();
     }, []);
 
     const handleUpdateQuantity = async (productId: string, delta: number) => {
@@ -167,7 +184,7 @@ export default function CartPage() {
         (acc, item) => acc + item.price * item.quantity,
         0
     )
-    const shipping = cartItems.length > 0 && subtotal < 50000 ? 15000 : 0
+    const shipping = cartItems.length > 0 ? (subtotal >= 50000 ? 0 : (shippingMethod === "sucursal" ? 10000 : 15000)) : 0
     const total = subtotal + shipping
 
     return (
@@ -233,6 +250,9 @@ export default function CartPage() {
                             onCheckout={handleCheckout}
                             isCheckoutDisabled={cartItems.length === 0 || isLoading || isCheckingOut}
                             isCheckingOut={isCheckingOut}
+                            mainAddress={mainAddress}
+                            shippingMethod={shippingMethod}
+                            onShippingMethodChange={setShippingMethod}
                         />
                     </GridItem>
                 </Grid>
