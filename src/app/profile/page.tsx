@@ -18,13 +18,17 @@ import NextLink from "next/link"
 
 import OrderCard from "@/components/profile/OrderCard"
 import AddressSection from "@/components/profile/AddressSection"
+import { MOCK_ORDER_DETAILS } from "@/lib/mockOrders"
 
-// Mock Data
-const MOCK_ORDERS = [
-    { id: "ORD-10023", date: "10 de Mayo, 2026", status: "Entregado", total: 40.50, items: 2 },
-    { id: "ORD-10024", date: "12 de Mayo, 2026", status: "En camino", total: 22.00, items: 1 },
-    { id: "ORD-10025", date: "13 de Mayo, 2026", status: "Pendiente", total: 63.50, items: 3 },
-]
+// Mock Data generados dinámicamente para coincidir exactamente con sus detalles
+const MOCK_ORDERS = Object.values(MOCK_ORDER_DETAILS).map(order => ({
+    id: order.id,
+    date: order.date,
+    status: order.status,
+    total: order.total,
+    items: order.items.reduce((acc, item) => acc + item.quantity, 0)
+}));
+
 
 export default function ProfilePage() {
     const [orders, setOrders] = useState<any[]>(MOCK_ORDERS);
