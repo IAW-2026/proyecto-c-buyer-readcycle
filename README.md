@@ -1,17 +1,19 @@
 # ReadCycle - Ecommerce de Libros Usados
 
+Aplicación **Buyer** del [Proyecto IAW 2026](https://iaw-2026.github.io/proyecto/) — comisión ReadCycle.
+
 - La aplicación está disponible en: [Vercel](https://buyer-readcycle.vercel.app)
 
 - Esta app corresponde al módulo de compradores del proyecto tipo C (Marketplace).
 
 ## Usuario comprador
 
-- Email: buyer+clerktest@iaw.com
+- Email: buyer+clerk_test@iaw.com
 - Contraseña: iawuser#
 
 ## Administrador
 
-- Email: admin+clerktest@iaw.com
+- Email: admin+clerk_test@iaw.com
 - Contraseña: iawuser#
 
 ## Aclaraciones
