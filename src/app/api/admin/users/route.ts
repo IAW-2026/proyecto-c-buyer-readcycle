@@ -159,6 +159,19 @@ export async function DELETE(req: NextRequest) {
             return Response.json({ error: "No puedes eliminarte a ti mismo" }, { status: 400 });
         }
 
+        const targetUser = await prisma.comprador.findUnique({
+            where: { id },
+            select: { rol: true }
+        });
+
+        if (!targetUser) {
+            return Response.json({ error: "Usuario no encontrado" }, { status: 404 });
+        }
+
+        if (targetUser.rol === 'admin') {
+            return Response.json({ error: "No se puede eliminar a otro administrador" }, { status: 400 });
+        }
+
         const client = await clerkClient();
 
         // 1. Eliminar de Clerk

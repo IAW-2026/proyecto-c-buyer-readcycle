@@ -186,16 +186,18 @@ export default function UserCard({ user, onRefresh }: UserCardProps) {
                         >
                             <LuPencil size={16} /> Editar
                         </Button>
-                        <IconButton
-                            aria-label="Borrar"
-                            variant="ghost"
-                            size="sm"
-                            color="red.500"
-                            _hover={{ bg: "red.50" }}
-                            onClick={handleDeleteUser}
-                        >
-                            <LuTrash2 size={18} />
-                        </IconButton>
+                        {user.rol !== 'admin' && (
+                            <IconButton
+                                aria-label="Borrar"
+                                variant="ghost"
+                                size="sm"
+                                color="red.500"
+                                _hover={{ bg: "red.50" }}
+                                onClick={handleDeleteUser}
+                            >
+                                <LuTrash2 size={18} />
+                            </IconButton>
+                        )}
                     </HStack>
                 </Flex>
             )}

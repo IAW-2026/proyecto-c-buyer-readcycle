@@ -31,16 +31,15 @@ export async function POST(request: Request) {
             where: { compradorId: userId }
         });
 
-        const shippingAddress = direccion ? {
+        if (!direccion) {
+            return Response.json({ error: "Debes registrar una dirección en tu perfil antes de comprar" }, { status: 400 });
+        }
+
+        const shippingAddress = {
             calle: direccion.calle,
             altura: direccion.altura,
             ciudad: direccion.ciudad,
             cp: direccion.cp
-        } : {
-            calle: "Av. Rivadavia",
-            altura: "4500",
-            ciudad: "CABA",
-            cp: "1408"
         };
 
         // Mapear los items y calcular totales

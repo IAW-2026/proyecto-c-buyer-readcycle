@@ -19,16 +19,33 @@ export const Toaster = () => {
     <Portal>
       <ChakraToaster toaster={toaster} insetInline={{ mdDown: "4" }}>
         {(toast) => (
-          <Toast.Root width={{ md: "sm" }}>
+          <Toast.Root
+            width={{ md: "sm" }}
+            bg="white"
+            borderRadius="brand"
+            border="1px solid"
+            borderColor="brand.sand"
+            borderLeft="6px solid"
+            borderLeftColor="brand.clay"
+            boxShadow="md"
+            p={4}
+            alignItems="center"
+          >
             {toast.type === "loading" ? (
-              <Spinner size="sm" color="blue.solid" />
+              <Spinner size="sm" color="brand.clay" />
             ) : (
-              <Toast.Indicator />
+              <Toast.Indicator color="brand.clay" />
             )}
-            <Stack gap="1" flex="1" maxWidth="100%">
-              {toast.title && <Toast.Title>{toast.title}</Toast.Title>}
+            <Stack gap="0.5" flex="1" maxWidth="100%">
+              {toast.title && (
+                <Toast.Title fontFamily="heading" color="brand.forest" fontWeight="bold" fontSize="sm">
+                  {toast.title}
+                </Toast.Title>
+              )}
               {toast.description && (
-                <Toast.Description>{toast.description}</Toast.Description>
+                <Toast.Description color="gray.600" fontSize="xs">
+                  {toast.description}
+                </Toast.Description>
               )}
             </Stack>
             {toast.action && (

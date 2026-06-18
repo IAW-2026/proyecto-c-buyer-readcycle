@@ -19,6 +19,7 @@ import { LuArrowLeft } from "react-icons/lu"
 import { mockProducts } from "@/lib/mockProducts"
 import CartItemList from "@/components/cart/CartItemList"
 import CartSummary from "@/components/cart/CartSummary"
+import { toaster } from "@/components/ui/toaster"
 
 type CartItemDisplay = {
     id: string;
@@ -40,6 +41,17 @@ export default function CartPage() {
 
     const handleCheckout = async () => {
         if (cartItems.length === 0) return;
+
+        if (!mainAddress) {
+            toaster.create({
+                title: "Dirección requerida",
+                description: "Por favor, registra una dirección de envío en tu perfil para finalizar la compra.",
+                type: "warning",
+                duration: 5000,
+            });
+            router.push("/profile");
+            return;
+        }
 
         setIsCheckingOut(true);
         try {
