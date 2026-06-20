@@ -28,7 +28,7 @@ export default clerkMiddleware(async (auth, req) => {
       });
       const data = await roleResponse.json();
 
-      if (data.role !== "admin") {
+      if (data.role !== "ADMIN") {
         // Redirigir al home si no es administrador
         return NextResponse.redirect(new URL("/", req.url));
       }

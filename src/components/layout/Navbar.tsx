@@ -27,7 +27,7 @@ export function Navbar() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(initialSearch);
-  const [userRole, setUserRole] = useState("comprador");
+  const [userRole, setUserRole] = useState("BUYER");
 
   const { userId, getToken } = useAuth();
   const [cartCount, setCartCount] = useState(0);
@@ -110,7 +110,7 @@ export function Navbar() {
 
   useEffect(() => {
     if (!userId) {
-      setUserRole("comprador");
+      setUserRole("BUYER");
       return;
     }
 
@@ -181,7 +181,7 @@ export function Navbar() {
 
           <Box flex="1" maxW={{ base: "none", md: "md", lg: "lg" }} mx="auto" display="flex" alignItems="center" gap={4}>
             <Show when="signed-in">
-              {userRole === "admin" && (
+              {userRole === "ADMIN" && (
                 <NextLink href="/admin/users" passHref>
                   <Button
                     variant="solid"
