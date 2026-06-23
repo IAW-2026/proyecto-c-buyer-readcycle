@@ -25,6 +25,7 @@ import {
     LuDollarSign,
     LuArrowRight,
     LuPackage,
+    LuX,
 } from "react-icons/lu"
 
 interface OrderDetail {
@@ -33,6 +34,7 @@ interface OrderDetail {
     status: string;
     paymentStatus: string;
     shippingStatus: string;
+    shippingMethod?: "domicilio" | "sucursal";
     subtotal: number;
     shippingCost: number;
     total: number;
@@ -58,12 +60,20 @@ function SuccessContent() {
     const orderId = searchParams.get("orderId")
     const [order, setOrder] = useState<OrderDetail | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [isPaymentFailed, setIsPaymentFailed] = useState(false)
     const confirmed = useRef(false)
 
     useEffect(() => {
         const paymentStatus = searchParams.get("status")
         const preferenceId = searchParams.get("preference_id")
         const shippingMethod = (searchParams.get("shippingMethod") as "domicilio" | "sucursal") || "domicilio"
+        const sellerOrderId = searchParams.get("sellerOrderId")
+
+        if (paymentStatus === "rejected" || paymentStatus === "failure" || paymentStatus === "cancelled") {
+            setIsPaymentFailed(true);
+            setIsLoading(false);
+            return;
+        }
 
         if (orderId) {
             // Buscar los detalles de la orden en localStorage
@@ -94,7 +104,7 @@ function SuccessContent() {
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ shippingMethod }),
+                        body: JSON.stringify({ shippingMethod, orderId: sellerOrderId }),
                     });
 
                     if (!response.ok) {
@@ -117,10 +127,23 @@ function SuccessContent() {
 
                         // Guardar detalle completo de la orden en localStorage
                         const currentOrderDetails = JSON.parse(localStorage.getItem('readcycle_order_details') || '{}');
-                        currentOrderDetails[data.order.id] = data.order;
+                        
+                        // Parsear y normalizar el estado del pago real desde Mercado Pago
+                        let finalPaymentStatus = "Pagado";
+                        if (paymentStatus === "pending" || paymentStatus === "in_process") {
+                            finalPaymentStatus = "Pendiente";
+                        } else if (paymentStatus && paymentStatus !== "approved") {
+                            finalPaymentStatus = "Rechazado";
+                        }
+
+                        const finalOrder = {
+                            ...data.order,
+                            paymentStatus: finalPaymentStatus
+                        };
+                        currentOrderDetails[data.order.id] = finalOrder;
                         localStorage.setItem('readcycle_order_details', JSON.stringify(currentOrderDetails));
 
-                        setOrder(data.order);
+                        setOrder(finalOrder);
 
                         // Notificar al Navbar para actualizar contador a 0
                         window.dispatchEvent(new Event('cart-updated'));
@@ -151,12 +174,115 @@ function SuccessContent() {
         )
     }
 
+    if (isPaymentFailed) {
+        return (
+            <Container maxW="3xl" py={{ base: 10, md: 16 }} px={{ base: 4, md: 6 }}>
+                <VStack gap={8} align="stretch">
+                    <Box
+                        bg="white"
+                        border="1px solid"
+                        borderColor="brand.sand"
+                        borderRadius="brand"
+                        p={{ base: 8, md: 10 }}
+                        textAlign="center"
+                        boxShadow="sm"
+                    >
+                        <Flex
+                            w="16"
+                            h="16"
+                            bg="red.50"
+                            color="red.600"
+                            borderRadius="full"
+                            align="center"
+                            justify="center"
+                            mx="auto"
+                            mb={6}
+                        >
+                            <LuX size={36} />
+                        </Flex>
+
+                        <Heading
+                            fontSize={{ base: "3xl", md: "4xl" }}
+                            color="brand.clay"
+                            fontWeight="800"
+                            mb={2}
+                        >
+                            Pago Rechazado
+                        </Heading>
+                        <Text color="gray.600" fontSize="lg" maxW="lg" mx="auto" mb={6}>
+                            El pago a través de Mercado Pago no pudo ser procesado. No se ha realizado ningún cargo en tu cuenta.
+                        </Text>
+                        <Text color="gray.500" fontSize="md" maxW="md" mx="auto">
+                            Tus libros siguen guardados en el carrito para que puedas intentar nuevamente utilizando otro medio de pago.
+                        </Text>
+                    </Box>
+
+                    {/* Botones de Acción */}
+                    <Flex
+                        direction={{ base: "column", sm: "row" }}
+                        gap={4}
+                        justify="center"
+                        align="stretch"
+                    >
+                        <NextLink href="/cart" passHref style={{ flex: 1 }}>
+                            <Button
+                                w="full"
+                                size="lg"
+                                bg="brand.clay"
+                                color="white"
+                                borderRadius="brand"
+                                fontFamily="heading"
+                                fontWeight="semibold"
+                                _hover={{ bg: "#c66a4e" }}
+                                h="14"
+                                gap={2}
+                            >
+                                Volver al carrito <LuArrowRight size={18} />
+                            </Button>
+                        </NextLink>
+
+                        <NextLink href="/" passHref style={{ flex: 1 }}>
+                            <Button
+                                w="full"
+                                size="lg"
+                                variant="outline"
+                                borderColor="brand.sage"
+                                color="brand.forest"
+                                borderRadius="brand"
+                                fontFamily="heading"
+                                fontWeight="semibold"
+                                _hover={{ bg: "brand.sand" }}
+                                h="14"
+                            >
+                                Volver a la tienda
+                            </Button>
+                        </NextLink>
+                    </Flex>
+                </VStack>
+            </Container>
+        )
+    }
+
     // Fallback en caso de que no encontremos los detalles en localStorage (por ejemplo, si abrieron la URL directamente)
     const displayOrderId = orderId || "ORD-MOCK"
     const displayTotal = order ? order.total : 0
     const displayItems = order ? order.items : []
     const displayAddress = order ? order.shippingAddress : { calle: "Dirección guardada", altura: "", ciudad: "", cp: "" }
     const displayPaymentStatus = order ? order.paymentStatus : "Pagado"
+
+    const badgeProps = (() => {
+        const status = displayPaymentStatus.toLowerCase();
+        if (status === "approved" || status === "aprobado" || status === "pagado") {
+            return { bg: "green.50", color: "green.600", text: "Aprobado" };
+        }
+        if (status === "pending" || status === "pendiente" || status === "in_process" || status === "en proceso") {
+            return { bg: "yellow.50", color: "yellow.700", text: "Pendiente" };
+        }
+        if (status === "rejected" || status === "rechazado" || status === "failure") {
+            return { bg: "red.50", color: "red.600", text: "Rechazado" };
+        }
+        return { bg: "gray.50", color: "gray.600", text: displayPaymentStatus };
+    })();
 
     return (
         <Container maxW="3xl" py={{ base: 10, md: 16 }} px={{ base: 4, md: 6 }}>
@@ -224,8 +350,8 @@ function SuccessContent() {
                                 Estado del Pago
                             </Text>
                             <Badge
-                                bg="green.50"
-                                color="green.600"
+                                bg={badgeProps.bg}
+                                color={badgeProps.color}
                                 px={3}
                                 py={1}
                                 borderRadius="full"
@@ -234,7 +360,7 @@ function SuccessContent() {
                                 gap={1}
                             >
                                 <LuDollarSign size={12} />
-                                <Text fontSize="xs" fontWeight="bold">{displayPaymentStatus}</Text>
+                                <Text fontSize="xs" fontWeight="bold">{badgeProps.text}</Text>
                             </Badge>
                         </VStack>
 
@@ -310,12 +436,20 @@ function SuccessContent() {
                                         <LuMapPin size={18} />
                                     </Box>
                                     <VStack align="start" gap={0.5}>
-                                        <Text fontSize="xs" color="gray.500" fontWeight="bold">Dirección de Entrega</Text>
+                                        <Text fontSize="xs" color="gray.500" fontWeight="bold">
+                                            {order?.shippingMethod === "sucursal" ? "Punto de Retiro" : "Dirección de Entrega"}
+                                        </Text>
                                         <Text fontWeight="semibold" color="brand.forest" fontSize="sm">
-                                            {displayAddress.calle} {displayAddress.altura}
+                                            {order?.shippingMethod === "sucursal"
+                                                ? `Sucursal de ${order.items[0]?.author || "Vendedor"}`
+                                                : `${displayAddress.calle} ${displayAddress.altura}`
+                                            }
                                         </Text>
                                         <Text color="gray.600" fontSize="xs">
-                                            {displayAddress.ciudad}, CP {displayAddress.cp}
+                                            {order?.shippingMethod === "sucursal"
+                                                ? "Coordinar retiro con el vendedor"
+                                                : `${displayAddress.ciudad}, CP ${displayAddress.cp}`
+                                            }
                                         </Text>
                                     </VStack>
                                 </HStack>
@@ -328,10 +462,10 @@ function SuccessContent() {
                                     <VStack align="start" gap={0.5}>
                                         <Text fontSize="xs" color="gray.500" fontWeight="bold">Método de Envío</Text>
                                         <Text fontWeight="semibold" color="brand.forest" fontSize="sm">
-                                            Envío estándar a domicilio
+                                            {order?.shippingMethod === "sucursal" ? "Retiro en sucursal" : "Envío estándar a domicilio"}
                                         </Text>
                                         <Text color="gray.600" fontSize="xs">
-                                            Llega en 3 a 5 días hábiles
+                                            {order?.shippingMethod === "sucursal" ? "Listo para retirar en 1 a 2 días hábiles" : "Llega en 3 a 5 días hábiles"}
                                         </Text>
                                     </VStack>
                                 </HStack>

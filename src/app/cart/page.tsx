@@ -35,14 +35,12 @@ type CartItemDisplay = {
 
 export default function CartPage() {
     const router = useRouter();
-    const { user } = useUser();
+    const { isLoaded, isSignedIn, user } = useUser();
     const [cartItems, setCartItems] = useState<CartItemDisplay[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCheckingOut, setIsCheckingOut] = useState(false);
     const [shippingMethod, setShippingMethod] = useState<"domicilio" | "sucursal">("domicilio");
     const [mainAddress, setMainAddress] = useState<any>(null);
-    const [preferenceId, setPreferenceId] = useState<string | null>(null);
-    const [isGeneratingPreference, setIsGeneratingPreference] = useState(false);
 
     // --- NUEVO ESTADO PARA EL ENVÍO ---
     const [shippingCost, setShippingCost] = useState<number>(0);
@@ -90,7 +88,8 @@ export default function CartPage() {
             if (!res.ok) throw new Error("Error al calcular el envío");
 
             const data = await res.json();
-            setShippingCost(data.cost);
+            console.log('data shipping', data);
+            setShippingCost(data.cost !== undefined ? data.cost : (data.total !== undefined ? data.total : 0));
         } catch (error) {
             console.error("Error obteniendo costo de envío:", error);
             // Fallback por si el endpoint falla (puedes dejarlo en 0 o un hardcode preventivo)
@@ -157,57 +156,84 @@ export default function CartPage() {
         }
     };
 
-    const generatePreferenceId = async (items: CartItemDisplay[], method: "domicilio" | "sucursal", address: any, currentShippingCost: number) => {
-        if (items.length === 0 || !address || !user) {
-            setPreferenceId(null);
-            return;
+    const handleWalletSubmit = async () => {
+        if (cartItems.length === 0 || !mainAddress || !user) {
+            throw new Error("No se puede iniciar el pago.");
         }
 
-        setIsGeneratingPreference(true);
         try {
-            const currentOrigin = window.location.origin;
-            const secureOrigin = currentOrigin.replace("http://", "https://");
-            const dynamicReturnUrl = `${secureOrigin}/checkout/success?shippingMethod=${method}`;
-
-            const res = await fetch('/api/payments/checkout', {
-                method: 'POST',
+            // 1. Crear la orden en el microservicio del vendedor (a través del proxy)
+            const orderRes = await fetch("/api/orders", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     buyerId: user.id,
-                    sellerId: items[0]?.sellerId || "mock_seller_id",
-                    orderId: `ORDER-${Date.now()}`,
+                    shippingCost: shipping,
+                    items: cartItems.map((item) => ({
+                        productId: item.productId,
+                        quantity: item.quantity,
+                    })),
+                }),
+            });
+
+            if (!orderRes.ok) {
+                const errData = await orderRes.json().catch(() => ({}));
+                throw new Error(errData.error || "Error al crear la orden en el vendedor");
+            }
+
+            const orderData = await orderRes.json();
+
+            // 2. Generar el checkout de Mercado Pago con la información de la orden
+            const currentOrigin = window.location.origin;
+            const secureOrigin = currentOrigin.replace("http://", "https://");
+            const dynamicReturnUrl = `${secureOrigin}/checkout/success?shippingMethod=${shippingMethod}&sellerOrderId=${orderData.id}`;
+
+            const checkoutRes = await fetch("/api/payments/checkout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    buyerId: user.id,
+                    sellerId: orderData.sellerId,
+                    orderId: orderData.id,
                     returnUrl: dynamicReturnUrl,
                     baseUrl: secureOrigin,
                     items: [
-                        ...items.map((item) => ({
+                        ...orderData.items.map((item: any) => ({
                             id: item.productId,
-                            title: item.title,
+                            title: item.product?.title || "Libro",
                             quantity: item.quantity,
                             unit_price: item.price,
                         })),
-                        ...(currentShippingCost > 0 ? [{
+                        ...(orderData.shippingCost > 0 ? [{
                             id: "shipping",
                             title: "Costo de envío (Domicilio)",
                             quantity: 1,
-                            unit_price: currentShippingCost,
+                            unit_price: orderData.shippingCost,
                         }] : []),
                     ],
                 }),
             });
 
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Error al crear la preferencia');
+            if (!checkoutRes.ok) {
+                const errData = await checkoutRes.json().catch(() => ({}));
+                throw new Error(errData.error || "Error al generar la preferencia de Mercado Pago");
             }
-            const data = await res.json();
-            setPreferenceId(data.id);
-        } catch (error) {
-            console.error("Error al generar la preferencia de Mercado Pago:", error);
-            setPreferenceId(null);
-        } finally {
-            setIsGeneratingPreference(false);
+
+            const checkoutData = await checkoutRes.json();
+            return checkoutData.id; // Retorna el preferenceId a Mercado Pago
+        } catch (error: any) {
+            console.error("Error en handleWalletSubmit:", error);
+            toaster.create({
+                title: "Error al iniciar el pago",
+                description: error.message || "Hubo un problema al procesar tu compra. Por favor, intenta de nuevo.",
+                type: "error",
+                duration: 5000,
+            });
+            throw error;
         }
     };
 
@@ -218,16 +244,11 @@ export default function CartPage() {
         }
     }, [cartItems, mainAddress]);
 
-    // Modificado para que dependa también del costo real de envío obtenido
-    useEffect(() => {
-        if (cartItems.length > 0 && mainAddress && user) {
-            generatePreferenceId(cartItems, shippingMethod, mainAddress, shipping);
-        } else {
-            setPreferenceId(null);
-        }
-    }, [cartItems, shippingMethod, mainAddress, user, shipping]);
+
 
     useEffect(() => {
+        if (!isLoaded || !isSignedIn) return;
+
         const fetchCart = async () => {
             try {
                 const [cartRes, productsRes] = await Promise.all([
@@ -283,7 +304,7 @@ export default function CartPage() {
 
         fetchCart();
         fetchAddress();
-    }, []);
+    }, [isLoaded, isSignedIn]);
 
     const handleUpdateQuantity = async (productId: string, delta: number) => {
         const itemIndex = cartItems.findIndex(i => i.productId === productId);
@@ -374,12 +395,12 @@ export default function CartPage() {
                             total={total}
                             onCheckout={handleCheckout}
                             // Se añade 'isCalculatingShipping' para deshabilitar el botón si está cargando el costo
-                            isCheckoutDisabled={cartItems.length === 0 || isLoading || isCheckingOut || isGeneratingPreference || isCalculatingShipping || !preferenceId}
-                            isCheckingOut={isCheckingOut || isGeneratingPreference || isCalculatingShipping}
+                            isCheckoutDisabled={cartItems.length === 0 || isLoading || isCheckingOut || isCalculatingShipping}
+                            isCheckingOut={isCheckingOut || isCalculatingShipping}
                             mainAddress={mainAddress}
                             shippingMethod={shippingMethod}
                             onShippingMethodChange={setShippingMethod}
-                            preferenceId={preferenceId}
+                            onSubmitPayment={handleWalletSubmit}
                             isCalculatingShipping={isCalculatingShipping}
                         />
                     </GridItem>

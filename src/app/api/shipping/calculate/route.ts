@@ -13,7 +13,7 @@ export async function POST(request: Request) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-API-Key": `Bearer ${apiKey}`,
+                "X-API-Key": `${apiKey}`,
             },
             body: JSON.stringify({
                 sellerId,

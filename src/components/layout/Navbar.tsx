@@ -20,6 +20,7 @@ import { LuSearch, LuShoppingCart, LuUser } from "react-icons/lu"
 import { Show, SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { mockCategories } from "@/lib/mockCategories"
+import { toaster } from "@/components/ui/toaster"
 
 export function Navbar() {
   const router = useRouter();
@@ -32,6 +33,18 @@ export function Navbar() {
   const { userId, getToken } = useAuth();
   const [cartCount, setCartCount] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleCartClick = (e: React.MouseEvent) => {
+    if (cartCount === 0) {
+      e.preventDefault();
+      toaster.create({
+        title: "El carrito está vacío",
+        description: "Agrega libros para poder ver tu carrito.",
+        type: "warning",
+        duration: 3500,
+      });
+    }
+  };
 
   const fetchCartCount = async () => {
     try {
@@ -318,7 +331,7 @@ export function Navbar() {
                 </SignUpButton>
               </Show>
               <Show when="signed-in">
-                <NextLink href="/cart" passHref style={{ textDecoration: 'none' }}>
+                <NextLink href="/cart" passHref style={{ textDecoration: 'none' }} onClick={handleCartClick}>
                   <Box position="relative" display="inline-block">
                     <IconButton
                       aria-label="Ver carrito"

@@ -92,7 +92,7 @@ export async function POST(request: Request) {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-API-Key": `Bearer ${apiKey}`,
+                        "X-API-Key": `${apiKey}`,
                     },
                     body: JSON.stringify({
                         sellerId,
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
                 if (res.ok) {
                     const data = await res.json();
-                    shippingCost = data.cost;
+                    shippingCost = data.total;
                 } else {
                     console.error("Error response from shipping calculate API:", res.status);
                     shippingCost = 1500; // Fallback
@@ -120,8 +120,8 @@ export async function POST(request: Request) {
             where: { carritoId: carrito.id }
         });
 
-        // Generar un ID de orden aleatorio
-        const orderId = `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
+        // Generar un ID de orden aleatorio o usar el provisto por la API del vendedor
+        const orderId = body.orderId || `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
 
         // Formatear fecha
         const now = new Date();
@@ -134,6 +134,7 @@ export async function POST(request: Request) {
             status: "Pendiente",
             paymentStatus: "Pagado",
             shippingStatus: "Preparando pedido",
+            shippingMethod,
             subtotal,
             shippingCost,
             total,

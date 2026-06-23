@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Flex, Heading, Text, VStack, Skeleton } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text, VStack, Skeleton, Button } from "@chakra-ui/react";
 import { LuShieldCheck, LuTruck } from "react-icons/lu";
 // 1. Importamos las herramientas de Mercado Pago
 import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
@@ -20,7 +20,7 @@ interface CartSummaryProps {
     mainAddress: any;
     shippingMethod: "domicilio" | "sucursal";
     onShippingMethodChange?: (method: "domicilio" | "sucursal") => void;
-    preferenceId?: string | null;
+    onSubmitPayment?: () => Promise<any>;
     isCalculatingShipping?: boolean;
 }
 
@@ -34,7 +34,7 @@ export default function CartSummary({
     mainAddress,
     shippingMethod,
     onShippingMethodChange,
-    preferenceId,
+    onSubmitPayment,
     isCalculatingShipping = false,
 }: CartSummaryProps) {
     return (
@@ -133,8 +133,25 @@ export default function CartSummary({
 
             {/* OPCIÓN B: Muestra Mercado Pago si está el ID, sino muestra la animación de carga */}
             <Box mb={8}>
-                {preferenceId ? (
-                    <Wallet initialization={{ preferenceId: preferenceId }} />
+                {!mainAddress ? (
+                    <Button
+                        w="full"
+                        size="lg"
+                        bg="brand.clay"
+                        color="white"
+                        borderRadius="brand"
+                        fontFamily="heading"
+                        fontSize="lg"
+                        fontWeight="semibold"
+                        _hover={{ bg: "#c66a4e" }}
+                        h="14"
+                        onClick={onCheckout}
+                        disabled={isCheckingOut}
+                    >
+                        Registrar dirección de envío
+                    </Button>
+                ) : onSubmitPayment ? (
+                    <Wallet onSubmit={onSubmitPayment} />
                 ) : (
                     <Skeleton
                         h="14"
