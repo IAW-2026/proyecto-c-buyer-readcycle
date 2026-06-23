@@ -188,7 +188,8 @@ export default function CartPage() {
             // 2. Generar el checkout de Mercado Pago con la información de la orden
             const currentOrigin = window.location.origin;
             const secureOrigin = currentOrigin.replace("http://", "https://");
-            const dynamicReturnUrl = `${secureOrigin}/checkout/success?shippingMethod=${shippingMethod}&sellerOrderId=${orderData.id}`;
+            const successUrl = `${secureOrigin}/checkout/success?shippingMethod=${shippingMethod}&sellerOrderId=${orderData.id}`;
+            const failureUrl = `${secureOrigin}/checkout/success?shippingMethod=${shippingMethod}&sellerOrderId=${orderData.id}&status=rejected`;
 
             const checkoutRes = await fetch("/api/payments/checkout", {
                 method: "POST",
@@ -199,8 +200,8 @@ export default function CartPage() {
                     buyerId: user.id,
                     sellerId: orderData.sellerId,
                     orderId: orderData.id,
-                    returnUrl: dynamicReturnUrl,
-                    baseUrl: secureOrigin,
+                    successUrl,
+                    failureUrl,
                     items: [
                         ...orderData.items.map((item: any) => ({
                             id: item.productId,

@@ -15,21 +15,21 @@ export async function POST(request: Request) {
       );
     }
 
-    // Asegurar que baseUrl y returnUrl usen https (requerido por Mercado Pago)
-    let baseUrl = body.baseUrl || "";
-    let returnUrl = body.returnUrl || "";
+    // Asegurar que successUrl y failureUrl usen https (requerido por Mercado Pago)
+    let successUrl = body.successUrl || "";
+    let failureUrl = body.failureUrl || "";
 
-    if (baseUrl.startsWith("http://")) {
-      baseUrl = baseUrl.replace("http://", "https://");
+    if (successUrl.startsWith("http://")) {
+      successUrl = successUrl.replace("http://", "https://");
     }
-    if (returnUrl.startsWith("http://")) {
-      returnUrl = returnUrl.replace("http://", "https://");
+    if (failureUrl.startsWith("http://")) {
+      failureUrl = failureUrl.replace("http://", "https://");
     }
 
     const payload = {
       ...body,
-      baseUrl,
-      returnUrl,
+      successUrl,
+      failureUrl,
     };
 
     // Hacer la petición al microservicio de pagos externo
