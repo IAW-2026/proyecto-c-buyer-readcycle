@@ -1,7 +1,14 @@
 "use client";
 
-import { Box, Button, Flex, Heading, Text, VStack } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text, VStack, Skeleton, Button } from "@chakra-ui/react";
 import { LuShieldCheck, LuTruck } from "react-icons/lu";
+// 1. Importamos las herramientas de Mercado Pago
+import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
+
+// 2. Inicializamos el SDK con tu clave pública (desde .env o fallback de prueba)
+const mpPublicKey = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY || "TEST-db09695d-ffbb-46f4-8a4e-128a38b1f2e6";
+initMercadoPago(mpPublicKey);
+
 
 interface CartSummaryProps {
     subtotal: number;
@@ -12,7 +19,9 @@ interface CartSummaryProps {
     isCheckingOut: boolean;
     mainAddress: any;
     shippingMethod: "domicilio" | "sucursal";
-    onShippingMethodChange: (method: "domicilio" | "sucursal") => void;
+    onShippingMethodChange?: (method: "domicilio" | "sucursal") => void;
+    onSubmitPayment?: () => Promise<any>;
+    isCalculatingShipping?: boolean;
 }
 
 export default function CartSummary({
@@ -25,6 +34,8 @@ export default function CartSummary({
     mainAddress,
     shippingMethod,
     onShippingMethodChange,
+    onSubmitPayment,
+    isCalculatingShipping = false,
 }: CartSummaryProps) {
     return (
         <Box
@@ -63,28 +74,12 @@ export default function CartSummary({
                         align="center"
                         p={3}
                         border="1px solid"
-                        borderColor={shippingMethod === "domicilio" ? "brand.forest" : "brand.sand"}
+                        borderColor="brand.forest"
                         borderRadius="brand"
-                        cursor="pointer"
-                        bg={shippingMethod === "domicilio" ? "rgba(107, 142, 35, 0.05)" : "transparent"}
-                        onClick={() => onShippingMethodChange("domicilio")}
-                        transition="all 0.2s"
-                        _hover={{ borderColor: "brand.forest" }}
+                        bg="rgba(107, 142, 35, 0.05)"
                     >
-                        <Box
-                            w="4"
-                            h="4"
-                            borderRadius="full"
-                            border="2px solid"
-                            borderColor={shippingMethod === "domicilio" ? "brand.forest" : "gray.400"}
-                            mr={3}
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                        >
-                            {shippingMethod === "domicilio" && (
-                                <Box w="2" h="2" borderRadius="full" bg="brand.forest" />
-                            )}
+                        <Box color="brand.forest" mr={3}>
+                            <LuTruck size={20} />
                         </Box>
                         <Box flex="1">
                             <Text fontSize="sm" fontWeight="bold" color="brand.forest">
@@ -95,47 +90,11 @@ export default function CartSummary({
                             </Text>
                         </Box>
                         <Text fontSize="sm" fontWeight="bold" color="brand.forest">
-                            {subtotal >= 50000 ? "Gratis" : "$15.000"}
-                        </Text>
-                    </Flex>
-
-                    <Flex
-                        align="center"
-                        p={3}
-                        border="1px solid"
-                        borderColor={shippingMethod === "sucursal" ? "brand.forest" : "brand.sand"}
-                        borderRadius="brand"
-                        cursor="pointer"
-                        bg={shippingMethod === "sucursal" ? "rgba(107, 142, 35, 0.05)" : "transparent"}
-                        onClick={() => onShippingMethodChange("sucursal")}
-                        transition="all 0.2s"
-                        _hover={{ borderColor: "brand.forest" }}
-                    >
-                        <Box
-                            w="4"
-                            h="4"
-                            borderRadius="full"
-                            border="2px solid"
-                            borderColor={shippingMethod === "sucursal" ? "brand.forest" : "gray.400"}
-                            mr={3}
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                        >
-                            {shippingMethod === "sucursal" && (
-                                <Box w="2" h="2" borderRadius="full" bg="brand.forest" />
+                            {isCalculatingShipping ? (
+                                "Calculando..."
+                            ) : (
+                                subtotal >= 50000 || shipping === 0 ? "Gratis" : `$${shipping.toLocaleString('es-AR')}`
                             )}
-                        </Box>
-                        <Box flex="1">
-                            <Text fontSize="sm" fontWeight="bold" color="brand.forest">
-                                Envío a sucursal
-                            </Text>
-                            <Text fontSize="xs" color="gray.500">
-                                Retiro en correo
-                            </Text>
-                        </Box>
-                        <Text fontSize="sm" fontWeight="bold" color="brand.forest">
-                            {subtotal >= 50000 ? "Gratis" : "$10.000"}
                         </Text>
                     </Flex>
                 </VStack>
@@ -172,23 +131,38 @@ export default function CartSummary({
                 </Text>
             </Flex>
 
-            <Button
-                w="full"
-                size="lg"
-                bg="brand.clay"
-                color="white"
-                borderRadius="brand"
-                fontFamily="heading"
-                fontSize="lg"
-                fontWeight="semibold"
-                _hover={{ bg: "#c66a4e" }}
-                mb={8}
-                h="14"
-                onClick={onCheckout}
-                disabled={isCheckoutDisabled}
-            >
-                {isCheckingOut ? "Procesando..." : "Finalizar compra"}
-            </Button>
+            {/* OPCIÓN B: Muestra Mercado Pago si está el ID, sino muestra la animación de carga */}
+            <Box mb={8}>
+                {!mainAddress ? (
+                    <Button
+                        w="full"
+                        size="lg"
+                        bg="brand.clay"
+                        color="white"
+                        borderRadius="brand"
+                        fontFamily="heading"
+                        fontSize="lg"
+                        fontWeight="semibold"
+                        _hover={{ bg: "#c66a4e" }}
+                        h="14"
+                        onClick={onCheckout}
+                        disabled={isCheckingOut}
+                    >
+                        Registrar dirección de envío
+                    </Button>
+                ) : onSubmitPayment ? (
+                    <Wallet onSubmit={onSubmitPayment} />
+                ) : (
+                    <Skeleton
+                        h="14"
+                        borderRadius="brand"
+                        css={{
+                            "--skeleton-start-color": "colors.brand.sand",
+                            "--skeleton-end-color": "colors.gray.200",
+                        }}
+                    />
+                )}
+            </Box>
 
             <VStack align="start" gap={3}>
                 <Flex align="center" gap={3}>

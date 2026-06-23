@@ -89,7 +89,7 @@ export default function UserCard({ user, onRefresh }: UserCardProps) {
         <Box
             bg="white"
             border="1px solid"
-            borderColor={user.rol === "admin" ? "brand.sage" : "brand.sand"}
+            borderColor={user.rol === "ADMIN" ? "brand.sage" : "brand.sand"}
             borderRadius="brand"
             p={6}
             position="relative"
@@ -133,8 +133,8 @@ export default function UserCard({ user, onRefresh }: UserCardProps) {
                                         outline: "none"
                                     }}
                                 >
-                                    <option value="comprador">Comprador</option>
-                                    <option value="admin">Administrador</option>
+                                    <option value="BUYER">Comprador</option>
+                                    <option value="ADMIN">Administrador</option>
                                 </select>
                             </Box>
                         </Box>
@@ -159,13 +159,13 @@ export default function UserCard({ user, onRefresh }: UserCardProps) {
                                 {user.name} {user.surname}
                             </Text>
                             <Badge
-                                bg={user.rol === 'admin' ? 'brand.sage' : 'gray.100'}
-                                color={user.rol === 'admin' ? 'white' : 'gray.700'}
+                                bg={user.rol === 'ADMIN' ? 'brand.sage' : 'gray.100'}
+                                color={user.rol === 'ADMIN' ? 'white' : 'gray.700'}
                                 px={3} py={1} borderRadius="full"
                                 display="flex" alignItems="center" gap={1.5}
                             >
-                                {user.rol === 'admin' ? <LuShield size={14} /> : <LuUser size={14} />}
-                                <Text fontSize="xs" fontWeight="semibold">{user.rol === 'admin' ? 'Administrador' : 'Comprador'}</Text>
+                                {user.rol === 'ADMIN' ? <LuShield size={14} /> : <LuUser size={14} />}
+                                <Text fontSize="xs" fontWeight="semibold">{user.rol === 'ADMIN' ? 'Administrador' : 'Comprador'}</Text>
                             </Badge>
                         </HStack>
 
@@ -186,16 +186,18 @@ export default function UserCard({ user, onRefresh }: UserCardProps) {
                         >
                             <LuPencil size={16} /> Editar
                         </Button>
-                        <IconButton
-                            aria-label="Borrar"
-                            variant="ghost"
-                            size="sm"
-                            color="red.500"
-                            _hover={{ bg: "red.50" }}
-                            onClick={handleDeleteUser}
-                        >
-                            <LuTrash2 size={18} />
-                        </IconButton>
+                        {user.rol !== 'ADMIN' && (
+                            <IconButton
+                                aria-label="Borrar"
+                                variant="ghost"
+                                size="sm"
+                                color="red.500"
+                                _hover={{ bg: "red.50" }}
+                                onClick={handleDeleteUser}
+                            >
+                                <LuTrash2 size={18} />
+                            </IconButton>
+                        )}
                     </HStack>
                 </Flex>
             )}

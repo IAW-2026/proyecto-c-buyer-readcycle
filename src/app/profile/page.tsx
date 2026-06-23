@@ -31,6 +31,7 @@ const MOCK_ORDERS = Object.values(MOCK_ORDER_DETAILS).map(order => ({
 
 
 export default function ProfilePage() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [orders, setOrders] = useState<any[]>(MOCK_ORDERS);
 
     useEffect(() => {
@@ -38,6 +39,7 @@ export default function ProfilePage() {
         if (storedOrders) {
             try {
                 const parsed = JSON.parse(storedOrders);
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setOrders([...parsed, ...MOCK_ORDERS]);
             } catch (e) {
                 console.error("Error al cargar pedidos guardados:", e);
@@ -50,7 +52,7 @@ export default function ProfilePage() {
             <Container maxW="7xl" px={{ base: 4, md: 6 }}>
 
                 {/* Header (Mismo estilo que el carrito) */}
-                <Flex align="baseline" gap={3} mb={4}>
+                <Flex align="center" justify="space-between" wrap="wrap" gap={4} mb={6}>
                     <Stack gap="3">
                         <Heading
                             fontSize="5xl"
@@ -74,6 +76,23 @@ export default function ProfilePage() {
                             </Text>
                         </Flex>
                     </Stack>
+                    <a
+                        href="https://proyecto-c-payments-readcycle-nlqt.vercel.app/dashboard/disputes"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ textDecoration: "none" }}
+                    >
+                        <Button
+                            bg="brand.clay"
+                            color="white"
+                            _hover={{ bg: "brand.sage" }}
+                            fontWeight="semibold"
+                            borderRadius="brand"
+                            size="md"
+                        >
+                            ¿Tuviste algún problema con un pago?
+                        </Button>
+                    </a>
                 </Flex>
 
                 <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={8}>

@@ -7,7 +7,7 @@ import BooksTabs from "@/components/home/Tabs";
 import BookCard from "@/components/home/Card";
 import Pagination from "@/components/home/Pagination";
 
-import { mockProducts } from "@/lib/mockProducts";
+import { getProducts } from "@/lib/products";
 
 interface HomePageProps {
   searchParams: Promise<{
@@ -30,13 +30,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const currentPage = page ? parseInt(page, 10) : 1;
   const itemsPerPage = 8;
 
+  const products = await getProducts();
+
   // 1. Filtrado inicial por categoría si no es "Todos los libros"
   let filteredProducts = selectedCategory !== "Todos los libros"
-    ? mockProducts.filter(
+    ? products.filter(
       (product) =>
         product.category.name.toLowerCase() === selectedCategory.toLowerCase()
     )
-    : mockProducts;
+    : products;
 
   // 2. Filtrado y ordenamiento con prioridades si hay búsqueda activa
   if (search && search.trim() !== "") {

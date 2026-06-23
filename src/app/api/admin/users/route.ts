@@ -8,7 +8,7 @@ async function checkIsAdmin(userId: string | null) {
         where: { id: userId },
         select: { rol: true }
     });
-    return user?.rol === 'admin';
+    return user?.rol === 'ADMIN';
 }
 export async function GET() {
     try {
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
                 name,
                 surname: surname || "",
                 email,
-                rol: rol || "comprador"
+                rol: rol || "BUYER"
             }
         });
         return Response.json({ success: true, user: newUser });
@@ -157,6 +157,19 @@ export async function DELETE(req: NextRequest) {
 
         if (id === userId) {
             return Response.json({ error: "No puedes eliminarte a ti mismo" }, { status: 400 });
+        }
+
+        const targetUser = await prisma.comprador.findUnique({
+            where: { id },
+            select: { rol: true }
+        });
+
+        if (!targetUser) {
+            return Response.json({ error: "Usuario no encontrado" }, { status: 404 });
+        }
+
+        if (targetUser.rol === 'ADMIN') {
+            return Response.json({ error: "No se puede eliminar a otro administrador" }, { status: 400 });
         }
 
         const client = await clerkClient();

@@ -20,6 +20,7 @@ import { LuSearch, LuShoppingCart, LuUser } from "react-icons/lu"
 import { Show, SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { mockCategories } from "@/lib/mockCategories"
+import { toaster } from "@/components/ui/toaster"
 
 export function Navbar() {
   const router = useRouter();
@@ -27,11 +28,23 @@ export function Navbar() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(initialSearch);
-  const [userRole, setUserRole] = useState("comprador");
+  const [userRole, setUserRole] = useState("BUYER");
 
   const { userId, getToken } = useAuth();
   const [cartCount, setCartCount] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleCartClick = (e: React.MouseEvent) => {
+    if (cartCount === 0) {
+      e.preventDefault();
+      toaster.create({
+        title: "El carrito está vacío",
+        description: "Agrega libros para poder ver tu carrito.",
+        type: "warning",
+        duration: 3500,
+      });
+    }
+  };
 
   const fetchCartCount = async () => {
     try {
@@ -110,7 +123,7 @@ export function Navbar() {
 
   useEffect(() => {
     if (!userId) {
-      setUserRole("comprador");
+      setUserRole("BUYER");
       return;
     }
 
@@ -181,7 +194,7 @@ export function Navbar() {
 
           <Box flex="1" maxW={{ base: "none", md: "md", lg: "lg" }} mx="auto" display="flex" alignItems="center" gap={4}>
             <Show when="signed-in">
-              {userRole === "admin" && (
+              {userRole === "ADMIN" && (
                 <NextLink href="/admin/users" passHref>
                   <Button
                     variant="solid"
@@ -318,7 +331,7 @@ export function Navbar() {
                 </SignUpButton>
               </Show>
               <Show when="signed-in">
-                <NextLink href="/cart" passHref style={{ textDecoration: 'none' }}>
+                <NextLink href="/cart" passHref style={{ textDecoration: 'none' }} onClick={handleCartClick}>
                   <Box position="relative" display="inline-block">
                     <IconButton
                       aria-label="Ver carrito"

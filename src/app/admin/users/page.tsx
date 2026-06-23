@@ -36,7 +36,7 @@ export default function AdminUsersPage() {
     const [isLoading, setIsLoading] = useState(true)
 
     const [isAdding, setIsAdding] = useState(false)
-    const [newForm, setNewForm] = useState({ name: "", surname: "", email: "", password: "", rol: "comprador" })
+    const [newForm, setNewForm] = useState({ name: "", surname: "", email: "", password: "", rol: "BUYER" })
 
     const fetchUsers = useCallback(async (silent = false) => {
         if (!silent) setIsLoading(true)
@@ -86,7 +86,7 @@ export default function AdminUsersPage() {
             if (res.ok && data.success) {
                 toaster.create({ title: "Usuario creado", type: "success", duration: 3000 })
                 setIsAdding(false)
-                setNewForm({ name: "", surname: "", email: "", password: "", rol: "comprador" })
+                setNewForm({ name: "", surname: "", email: "", password: "", rol: "BUYER" })
                 fetchUsers(true)
             } else {
                 throw new Error(data.error || "Error al crear")
@@ -217,8 +217,8 @@ export default function AdminUsersPage() {
                                                             outline: "none"
                                                         }}
                                                     >
-                                                        <option value="comprador">Comprador</option>
-                                                        <option value="admin">Administrador</option>
+                                                        <option value="BUYER">Comprador</option>
+                                                        <option value="ADMIN">Administrador</option>
                                                     </select>
                                                 </Box>
                                             </Box>
@@ -263,8 +263,8 @@ export default function AdminUsersPage() {
                     <GridItem>
                         <UsersSummary
                             totalUsers={users.length}
-                            adminCount={users.filter(u => u.rol === 'admin').length}
-                            buyerCount={users.filter(u => u.rol === 'comprador').length}
+                            adminCount={users.filter(u => u.rol === 'ADMIN').length}
+                            buyerCount={users.filter(u => u.rol === 'BUYER').length}
                             isAdding={isAdding}
                             onAddClick={() => setIsAdding(true)}
                         />

@@ -11,7 +11,7 @@ model Comprador {
   name         String
   surname      String
   email        String @unique
-  rol          String @default("comprador")
+  rol          String @default("BUYER")
 
   direcciones  Direccion[]
   carritos     Carrito[]
