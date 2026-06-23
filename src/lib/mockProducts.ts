@@ -11,9 +11,9 @@ export type Product = {
   sellerId: string;
   seller: {
     id: string;
-    name: string;
-    surname: string;
-    email: string;
+    name?: string;
+    surname?: string;
+    email?: string;
   };
 
   images: {
@@ -21,7 +21,7 @@ export type Product = {
     url: string;
     isPrimary: boolean;
     productId: string;
-    createdAt: Date;
+    createdAt: Date | string;
   }[];
 
   categoryId: string;
@@ -30,8 +30,8 @@ export type Product = {
     name: string;
   };
 
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 };
 
 import {
@@ -44,11 +44,26 @@ import {
   mockCategoryTerror,
 } from "./mockCategories";
 
-import {
-  mockSeller,
-  mockSeller2,
-  mockSeller3,
-} from "./mockSellers";
+const mockSeller = {
+  id: "user_1",
+  name: "Juan",
+  surname: "Pérez",
+  email: "juan@example.com",
+};
+
+const mockSeller2 = {
+  id: "user_2",
+  name: "María",
+  surname: "Gómez",
+  email: "maria@example.com",
+};
+
+const mockSeller3 = {
+  id: "user_3",
+  name: "Carlos",
+  surname: "Ruiz",
+  email: "carlos.r@example.com",
+};
 
 export const mockProducts: Product[] = [
   {
