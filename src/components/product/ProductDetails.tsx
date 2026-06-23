@@ -14,6 +14,7 @@ import {
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import AuthModal from "@/components/layout/AuthModal";
+import SellerMismatchModal from "@/components/layout/SellerMismatchModal";
 
 interface ProductDetailsProps {
   productId: string;
@@ -38,6 +39,7 @@ export default function ProductDetails({
 }: ProductDetailsProps) {
   const { userId } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMismatchOpen, setIsMismatchOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAddToCart = async () => {
@@ -56,7 +58,12 @@ export default function ProductDetails({
         console.log("Agregado al carrito:", title);
         window.dispatchEvent(new Event('cart-updated'));
       } else {
-        console.error("Error al agregar al carrito");
+        const errorData = await response.json().catch(() => ({}));
+        if (errorData.error === "seller_mismatch") {
+          setIsMismatchOpen(true);
+        } else {
+          console.error("Error al agregar al carrito");
+        }
       }
     } catch (error) {
       console.error(error);
@@ -68,6 +75,7 @@ export default function ProductDetails({
   return (
     <>
       <AuthModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <SellerMismatchModal isOpen={isMismatchOpen} onClose={() => setIsMismatchOpen(false)} />
 
       <Grid
         templateColumns={{ base: "1fr", md: "1fr 1fr" }}

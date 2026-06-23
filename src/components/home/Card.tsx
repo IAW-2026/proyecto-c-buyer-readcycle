@@ -14,6 +14,7 @@ import { useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import { useAuth } from "@clerk/nextjs";
 import AuthModal from "@/components/layout/AuthModal";
+import SellerMismatchModal from "@/components/layout/SellerMismatchModal";
 import Link from "next/link";
 import { Product } from "@/lib/mockProducts";
 
@@ -24,9 +25,12 @@ interface BookCardProps {
 export default function BookCard({ product }: BookCardProps) {
   const { userId } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMismatchOpen, setIsMismatchOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const seller = `${product.seller.name} ${product.seller.surname}`;
+  const seller = product.seller?.name 
+    ? `${product.seller.name} ${product.seller.surname || ""}`.trim() 
+    : `Vendedor #${product.seller?.id?.slice(-4) || "Desconocido"}`;
   const price = `$${product.price.toLocaleString("es-AR")}`;
   const image = product.images.find((img) => img.isPrimary)?.url || product.images[0]?.url || "/images/placeholder.jpg";
   const title = product.title;
@@ -52,7 +56,12 @@ export default function BookCard({ product }: BookCardProps) {
         console.log("Agregado al carrito:", title);
         window.dispatchEvent(new Event('cart-updated'));
       } else {
-        console.error("Error al agregar al carrito");
+        const errorData = await response.json().catch(() => ({}));
+        if (errorData.error === "seller_mismatch") {
+          setIsMismatchOpen(true);
+        } else {
+          console.error("Error al agregar al carrito");
+        }
       }
     } catch (error) {
       console.error(error);
@@ -64,6 +73,7 @@ export default function BookCard({ product }: BookCardProps) {
   return (
     <>
       <AuthModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <SellerMismatchModal isOpen={isMismatchOpen} onClose={() => setIsMismatchOpen(false)} />
       <Link href={`/product/${product.id}`} style={{ display: 'block', textDecoration: 'none' }}>
         <Box
           bg="white"

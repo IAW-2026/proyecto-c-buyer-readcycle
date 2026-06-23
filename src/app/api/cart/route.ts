@@ -1,5 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
+import { getProducts } from '@/lib/products';
+import { mockProducts } from '@/lib/mockProducts';
 
 export async function GET() {
     try {
@@ -53,10 +55,35 @@ export async function POST(req: Request) {
             return Response.json({ error: "Datos inválidos" }, { status: 400 });
         }
 
+        const products = await getProducts();
+        const newProduct = products.find(p => p.id === productId);
+        if (!newProduct) {
+            return Response.json({ error: "Producto no encontrado" }, { status: 404 });
+        }
+
         let carrito = await prisma.carrito.findFirst({
             where: { compradorId: userId },
             include: { items: true }
         });
+
+        if (carrito && carrito.items.length > 0) {
+            console.log(`[Cart POST] Checking seller mismatch. Cart has ${carrito.items.length} items. Adding productId: ${productId} (sellerId: ${newProduct.sellerId})`);
+            for (const item of carrito.items) {
+                const existingProduct = products.find(p => p.id === item.productId) || mockProducts.find(p => p.id === item.productId);
+                if (existingProduct) {
+                    console.log(`[Cart POST] Comparing with existing item ${item.productId} (sellerId: ${existingProduct.sellerId})`);
+                    if (existingProduct.sellerId !== newProduct.sellerId) {
+                        console.log(`[Cart POST] Mismatch found! Rejecting request.`);
+                        return Response.json({
+                            error: "seller_mismatch",
+                            message: "No puedes agregar productos de diferentes vendedores al carrito."
+                        }, { status: 400 });
+                    }
+                } else {
+                    console.log(`[Cart POST] Warning: Existing cart item ${item.productId} not found in products list or mockProducts.`);
+                }
+            }
+        }
 
         if (!carrito) {
             const comprador = await prisma.comprador.findUnique({ where: { id: userId } });
