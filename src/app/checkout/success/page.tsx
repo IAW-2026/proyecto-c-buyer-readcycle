@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
+import { useEffect, useState, useRef, Suspense } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import NextLink from "next/link"
 import {
     Box,
@@ -54,30 +54,93 @@ interface OrderDetail {
 
 function SuccessContent() {
     const searchParams = useSearchParams()
+    const router = useRouter()
     const orderId = searchParams.get("orderId")
     const [order, setOrder] = useState<OrderDetail | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const confirmed = useRef(false)
 
     useEffect(() => {
-        if (!orderId) {
+        const paymentStatus = searchParams.get("status")
+        const preferenceId = searchParams.get("preference_id")
+        const shippingMethod = (searchParams.get("shippingMethod") as "domicilio" | "sucursal") || "domicilio"
+
+        if (orderId) {
+            // Buscar los detalles de la orden en localStorage
+            const storedDetails = localStorage.getItem('readcycle_order_details')
+            if (storedDetails) {
+                try {
+                    const parsed = JSON.parse(storedDetails)
+                    if (parsed[orderId]) {
+                        setOrder(parsed[orderId])
+                    }
+                } catch (e) {
+                    console.error("Error al leer detalles del pedido:", e)
+                }
+            }
             setIsLoading(false)
             return
         }
 
-        // Buscar los detalles de la orden en localStorage
-        const storedDetails = localStorage.getItem('readcycle_order_details')
-        if (storedDetails) {
-            try {
-                const parsed = JSON.parse(storedDetails)
-                if (parsed[orderId]) {
-                    setOrder(parsed[orderId])
+        // Si no hay orderId pero viene de Mercado Pago (status approved/pending/in_process)
+        if ((paymentStatus === "approved" || paymentStatus === "pending" || paymentStatus === "in_process") && preferenceId) {
+            if (confirmed.current) return
+            confirmed.current = true
+
+            const confirmCheckout = async () => {
+                try {
+                    const response = await fetch('/api/checkout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ shippingMethod }),
+                    });
+
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.error || 'Error al procesar la compra');
+                    }
+
+                    const data = await response.json();
+                    if (data.success && data.order) {
+                        // Guardar orden resumida en localStorage para listarla en el Perfil
+                        const currentOrders = JSON.parse(localStorage.getItem('readcycle_orders') || '[]');
+                        const newOrderListItem = {
+                            id: data.order.id,
+                            date: data.order.date,
+                            status: data.order.status,
+                            total: data.order.total,
+                            items: data.order.items.reduce((acc: number, item: any) => acc + item.quantity, 0),
+                        };
+                        localStorage.setItem('readcycle_orders', JSON.stringify([newOrderListItem, ...currentOrders]));
+
+                        // Guardar detalle completo de la orden en localStorage
+                        const currentOrderDetails = JSON.parse(localStorage.getItem('readcycle_order_details') || '{}');
+                        currentOrderDetails[data.order.id] = data.order;
+                        localStorage.setItem('readcycle_order_details', JSON.stringify(currentOrderDetails));
+
+                        setOrder(data.order);
+
+                        // Notificar al Navbar para actualizar contador a 0
+                        window.dispatchEvent(new Event('cart-updated'));
+
+                        // Limpiar la URL y agregar el orderId generado
+                        router.replace(`/checkout/success?orderId=${data.order.id}`);
+                    }
+                } catch (error) {
+                    console.error("Error al confirmar la compra con Mercado Pago:", error);
+                    alert("Ocurrió un error al procesar tu compra. Por favor, ponte en contacto con soporte.");
+                } finally {
+                    setIsLoading(false)
                 }
-            } catch (e) {
-                console.error("Error al leer detalles del pedido:", e)
-            }
+            };
+
+            confirmCheckout()
+        } else {
+            setIsLoading(false)
         }
-        setIsLoading(false)
-    }, [orderId])
+    }, [searchParams, router])
 
     if (isLoading) {
         return (

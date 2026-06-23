@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
-import { mockProducts } from '@/lib/mockProducts';
+import { getProducts } from '@/lib/products';
 
 export async function POST(request: Request) {
     try {
@@ -43,17 +43,23 @@ export async function POST(request: Request) {
         };
 
         // Mapear los items y calcular totales
+        const products = await getProducts();
         const items = carrito.items.map((item) => {
-            const product = mockProducts.find(p => p.id === item.productId);
+            const product = products.find(p => p.id === item.productId);
             if (!product) return null;
+
+            const sellerName = product.seller?.name
+                ? `${product.seller.name} ${product.seller.surname || ""}`.trim()
+                : `Vendedor #${product.seller?.id?.slice(-4) || "Desconocido"}`;
 
             return {
                 id: item.productId,
                 title: product.title,
-                author: `${product.seller.name} ${product.seller.surname}`,
+                author: sellerName,
                 price: product.price,
                 image: product.images.find(img => img.isPrimary)?.url || product.images[0]?.url || "/images/placeholder.jpg",
-                quantity: item.cantidad
+                quantity: item.cantidad,
+                weight: product.weight || 0.4
             };
         }).filter(Boolean) as Array<{
             id: string;
@@ -62,6 +68,7 @@ export async function POST(request: Request) {
             price: number;
             image: string;
             quantity: number;
+            weight?: number;
         }>;
 
         if (items.length === 0) {
@@ -69,7 +76,43 @@ export async function POST(request: Request) {
         }
 
         const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-        const shippingCost = subtotal >= 50000 ? 0 : (shippingMethod === "sucursal" ? 10000 : 15000);
+
+        let shippingCost = 0;
+        if (subtotal < 50000) {
+            try {
+                const totalWeight = items.reduce((acc, item) => acc + ((item.weight || 0.4) * item.quantity), 0);
+                const sellerId = products.find(p => p.id === items[0].id)?.sellerId || "mock_seller_id";
+                const destinationZipCode = direccion.cp.toString();
+
+                const sellerApiUrl = process.env.SELLER_API_URL || "https://proyecto-c-seller-readcycle.vercel.app/";
+                const apiKey = process.env.SELLER_API_KEY || "apitoken_readcycle_2026";
+                const url = `${sellerApiUrl.replace(/\/$/, "")}/api/public/shipping/calculate`;
+
+                const res = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-API-Key": `Bearer ${apiKey}`,
+                    },
+                    body: JSON.stringify({
+                        sellerId,
+                        destinationZipCode,
+                        totalWeight: parseFloat(totalWeight.toFixed(2))
+                    }),
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    shippingCost = data.cost;
+                } else {
+                    console.error("Error response from shipping calculate API:", res.status);
+                    shippingCost = 1500; // Fallback
+                }
+            } catch (error) {
+                console.error("Error al calcular envio en checkout:", error);
+                shippingCost = 1500; // Fallback
+            }
+        }
         const total = subtotal + shippingCost;
 
         // Borrar todos los items del carrito (vaciado del carrito)
