@@ -41,6 +41,10 @@ export default function BookCard({ product }: BookCardProps) {
     e.preventDefault();
     e.stopPropagation();
     if (!userId) {
+      localStorage.setItem(
+        "pending_cart_item",
+        JSON.stringify({ productId: product.id, cantidad: 1, title: title })
+      );
       setIsModalOpen(true);
       return;
     }

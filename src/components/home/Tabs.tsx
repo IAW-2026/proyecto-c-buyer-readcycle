@@ -5,6 +5,7 @@
 import { Tabs, Container } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { mockCategories } from "@/lib/mockCategories";
+import { Product } from "@/lib/mockProducts";
 
 const categories = [
   "Todos los libros",
@@ -13,9 +14,10 @@ const categories = [
 
 interface BooksTabsProps {
   selectedCategory: string;
+  products: Product[];
 }
 
-export default function BooksTabs({ selectedCategory }: BooksTabsProps) {
+export default function BooksTabs({ selectedCategory, products = [] }: BooksTabsProps) {
   const router = useRouter();
 
   const handleCategoryChange = (value: string) => {
@@ -24,6 +26,15 @@ export default function BooksTabs({ selectedCategory }: BooksTabsProps) {
     } else {
       router.push(`/?category=${encodeURIComponent(value)}`);
     }
+  };
+
+  const getCountForCategory = (categoryName: string) => {
+    if (categoryName === "Todos los libros") {
+      return products.length;
+    }
+    return products.filter(
+      (p) => p.category?.name?.toLowerCase() === categoryName.toLowerCase()
+    ).length;
   };
 
   return (
@@ -36,8 +47,9 @@ export default function BooksTabs({ selectedCategory }: BooksTabsProps) {
       >
       <Tabs.List
         display="flex"
-        gap={3}
-        overflowX="auto"
+        flexWrap={{ base: "wrap", md: "nowrap" }}
+        justifyContent={{ base: "center", md: "flex-start" }}
+        gap={{ base: 2, md: 3 }}
         py={2}
         bg="transparent"
         border="none"
@@ -47,8 +59,8 @@ export default function BooksTabs({ selectedCategory }: BooksTabsProps) {
             key={category}
             value={category}
             flexShrink={0}
-            px={5}
-            py={2.5}
+            px={{ base: 3, md: 5 }}
+            py={{ base: 1.5, md: 2.5 }}
             borderRadius="full"
             border="1px solid"
             borderColor="black"
@@ -56,7 +68,7 @@ export default function BooksTabs({ selectedCategory }: BooksTabsProps) {
             color="brand.forest"
             fontFamily="body"
             fontWeight="500"
-            fontSize="sm"
+            fontSize={{ base: "xs", md: "sm" }}
             letterSpacing="0.01em"
             transition="all 0.2s ease"
             whiteSpace="nowrap"
@@ -72,7 +84,7 @@ export default function BooksTabs({ selectedCategory }: BooksTabsProps) {
               borderColor: "brand.forest",
             }}
           >
-            {category}
+            {category} ({getCountForCategory(category)})
           </Tabs.Trigger>
         ))}
       </Tabs.List>

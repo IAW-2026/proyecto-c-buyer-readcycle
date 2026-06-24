@@ -4,12 +4,12 @@ export type Category = {
 };
 
 // Mock de categorías
-export const mockCategoryFiccion = { id: "cat_ficcion", name: "Ficción" };
-export const mockCategoryClasicos = { id: "cat_clasicos", name: "Clásicos" };
-export const mockCategoryEnsayo = { id: "cat_ensayo", name: "Ensayo" };
-export const mockCategoryPoesia = { id: "cat_poesia", name: "Poesía" };
-export const mockCategoryCienciaFiccion = { id: "cat_scifi", name: "Ciencia Ficción" };
-export const mockCategoryFantasia = { id: "cat_fantasia", name: "Fantasía" };
+export const mockCategoryFiccion = { id: "cat_ficcion", name: "Ficcion" };
+export const mockCategoryClasicos = { id: "cat_accion", name: "Accion" };
+export const mockCategoryEnsayo = { id: "cat_historia", name: "Historia" };
+export const mockCategoryPoesia = { id: "cat_poesia", name: "Poesia" };
+export const mockCategoryCienciaFiccion = { id: "cat_scifi", name: "Ciencia Ficcion" };
+export const mockCategoryFantasia = { id: "cat_fantasia", name: "Fantasia" };
 export const mockCategoryTerror = { id: "cat_terror", name: "Terror" };
 
 export const mockCategories: Category[] = [

@@ -261,45 +261,6 @@ export function Navbar() {
 
           <Flex flex="1" justify="flex-end" minW="0">
             <HStack gap={{ base: "3", md: "6" }}>
-              <Box position="relative">
-                <Menu.Root positioning={{ placement: "bottom-start" }}>
-                  <Menu.Trigger asChild>
-                    <Button
-                      bg="rgba(0, 0, 0, 0.06)"
-                      color="brand.forest"
-                      size="sm"
-                      borderRadius="brand"
-                      fontFamily="heading"
-                      fontWeight="600"
-                      _hover={{ bg: "rgba(0, 0, 0, 0.12)" }}
-                      display={{ base: "none", md: "flex" }}
-                    >
-                      Categorías
-                    </Button>
-                  </Menu.Trigger>
-                  <Menu.Content position="absolute" top="100%" left="50%" transform="translateX(-50%)" mt="2" bg="white" borderColor="brand.sand" borderRadius="brand" boxShadow="md" py="2" zIndex="popover">
-                    {mockCategories.map((category) => (
-                      <Menu.Item
-                        key={category.id}
-                        value={category.id}
-                        asChild
-                        _hover={{ bg: "brand.sand" }}
-                        px="4"
-                        py="2"
-                        cursor="pointer"
-                        color="brand.forest"
-                      >
-                        <NextLink
-                          href={`/?category=${encodeURIComponent(category.name)}`}
-                          style={{ textDecoration: 'none', display: 'block', width: '100%' }}
-                        >
-                          {category.name}
-                        </NextLink>
-                      </Menu.Item>
-                    ))}
-                  </Menu.Content>
-                </Menu.Root>
-              </Box>
               <Show when="signed-out">
                 <SignInButton mode="modal">
                   <Button

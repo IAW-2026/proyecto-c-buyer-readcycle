@@ -150,7 +150,12 @@ export default function CartPage() {
             }
         } catch (error: any) {
             console.error("Error al procesar el checkout:", error);
-            alert(error.message || "Hubo un problema al procesar tu compra. Por favor, intenta de nuevo.");
+            toaster.create({
+                title: "Error al finalizar la compra",
+                description: error.message || "Hubo un problema al procesar tu compra. Por favor, intenta de nuevo.",
+                type: "error",
+                duration: 5000,
+            });
         } finally {
             setIsCheckingOut(false);
         }

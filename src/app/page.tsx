@@ -86,7 +86,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <Container maxW="8xl">
         <HeroBanner />
 
-        <BooksTabs selectedCategory={selectedCategory} />
+        <BooksTabs selectedCategory={selectedCategory} products={products} />
 
         {/* Separador Estético */}
         <Box borderBottom="3px solid" borderColor="brand.sand" mb={4} />

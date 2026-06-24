@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import NextLink from "next/link"
+import { toaster } from "@/components/ui/toaster"
 import {
     Box,
     Button,
@@ -153,7 +154,12 @@ function SuccessContent() {
                     }
                 } catch (error) {
                     console.error("Error al confirmar la compra con Mercado Pago:", error);
-                    alert("Ocurrió un error al procesar tu compra. Por favor, ponte en contacto con soporte.");
+                    toaster.create({
+                        title: "Error al confirmar la compra",
+                        description: "Ocurrió un error al procesar tu compra. Por favor, ponte en contacto con soporte.",
+                        type: "error",
+                        duration: 6000,
+                    });
                 } finally {
                     setIsLoading(false)
                 }

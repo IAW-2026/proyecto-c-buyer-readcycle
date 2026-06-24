@@ -44,6 +44,10 @@ export default function ProductDetails({
 
   const handleAddToCart = async () => {
     if (!userId) {
+      localStorage.setItem(
+        "pending_cart_item",
+        JSON.stringify({ productId, cantidad: 1, title })
+      );
       setIsModalOpen(true);
       return;
     }
