@@ -1,45 +1,45 @@
-datasource db {
-  provider = "postgresql"
-}
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
 }
 
-model Comprador {
-  id           String @id
-  name         String
-  surname      String
-  email        String @unique
-  rol          String @default("BUYER")
+datasource db {
+  provider = "postgresql"
+}
 
-  direcciones  Direccion[]
-  carritos     Carrito[]
+model Comprador {
+  id          String      @id
+  name        String
+  surname     String
+  email       String      @unique
+  rol         String      @default("BUYER")
+  carritos    Carrito[]
+  direcciones Direccion[]
 }
 
 model Direccion {
   id          String    @id @default(uuid())
   compradorId String
-  comprador   Comprador @relation(fields: [compradorId], references: [id], onDelete: Cascade)
   calle       String
   altura      String
   ciudad      String
   cp          String
   esPrincipal Boolean   @default(true)
+  comprador   Comprador @relation(fields: [compradorId], references: [id], onDelete: Cascade)
 }
 
 model Carrito {
   id          String        @id @default(uuid())
   compradorId String
+  ultimaAct   DateTime      @updatedAt
   comprador   Comprador     @relation(fields: [compradorId], references: [id], onDelete: Cascade)
-  ultimaAct   DateTime      @updatedAt 
   items       ItemCarrito[]
 }
 
 model ItemCarrito {
   id        String  @id @default(uuid())
   carritoId String
-  carrito   Carrito @relation(fields: [carritoId], references: [id], onDelete: Cascade)
-  productId String  
+  productId String
   cantidad  Int     @default(1)
+  carrito   Carrito @relation(fields: [carritoId], references: [id], onDelete: Cascade)
 }

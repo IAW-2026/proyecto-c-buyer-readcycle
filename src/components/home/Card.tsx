@@ -17,6 +17,7 @@ import AuthModal from "@/components/layout/AuthModal";
 import SellerMismatchModal from "@/components/layout/SellerMismatchModal";
 import Link from "next/link";
 import { Product } from "@/lib/mockProducts";
+import { toaster } from "@/components/ui/toaster";
 
 interface BookCardProps {
   product: Product;
@@ -59,6 +60,12 @@ export default function BookCard({ product }: BookCardProps) {
       if (response.ok) {
         console.log("Agregado al carrito:", title);
         window.dispatchEvent(new Event('cart-updated'));
+        toaster.create({
+          title: "Producto agregado al carrito",
+          description: `"${title || "El libro"}" se agregó a tu carrito de compras.`,
+          type: "success",
+          duration: 4000,
+        });
       } else {
         const errorData = await response.json().catch(() => ({}));
         if (errorData.error === "seller_mismatch") {

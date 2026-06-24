@@ -7,7 +7,7 @@ import { LuArrowLeft, LuPackage, LuCheck, LuClock, LuTruck, LuMapPin, LuDollarSi
 import NextLink from "next/link"
 import { notFound } from "next/navigation"
 
-import { MOCK_ORDER_DETAILS, OrderDetail } from "@/lib/mockOrders"
+import { OrderDetail } from "@/lib/mockOrders"
 import ShippingTimeline from "@/components/profile/ShippingTimeline"
 import OrderItemsList from "@/components/profile/OrderItemsList"
 
@@ -48,22 +48,22 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        if (MOCK_ORDER_DETAILS[id]) {
-            setOrder(MOCK_ORDER_DETAILS[id])
-        } else {
-            const storedDetails = localStorage.getItem('readcycle_order_details')
-            if (storedDetails) {
-                try {
-                    const parsed = JSON.parse(storedDetails)
-                    if (parsed[id]) {
-                        setOrder(parsed[id])
-                    }
-                } catch (e) {
-                    console.error("Error al leer detalles del pedido:", e)
+        const fetchOrderDetail = async () => {
+            try {
+                const res = await fetch(`/api/orders?id=${id}`);
+                if (!res.ok) {
+                    throw new Error("No se pudo cargar la orden");
                 }
+                const data = await res.json();
+                setOrder(data);
+            } catch (e) {
+                console.error("Error al cargar detalles de la orden:", e);
+            } finally {
+                setIsLoading(false);
             }
-        }
-        setIsLoading(false)
+        };
+
+        fetchOrderDetail();
     }, [id])
 
     if (isLoading) {

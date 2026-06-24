@@ -11,40 +11,48 @@ import {
     Heading,
     Stack,
     Text,
-    VStack
+    VStack,
+    Spinner
 } from "@chakra-ui/react"
 import { LuArrowLeft } from "react-icons/lu"
 import NextLink from "next/link"
 
 import OrderCard from "@/components/profile/OrderCard"
 import AddressSection from "@/components/profile/AddressSection"
-import { MOCK_ORDER_DETAILS } from "@/lib/mockOrders"
-
-// Mock Data generados dinámicamente para coincidir exactamente con sus detalles
-const MOCK_ORDERS = Object.values(MOCK_ORDER_DETAILS).map(order => ({
-    id: order.id,
-    date: order.date,
-    status: order.status,
-    total: order.total,
-    items: order.items.reduce((acc, item) => acc + item.quantity, 0)
-}));
 
 
 export default function ProfilePage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [orders, setOrders] = useState<any[]>(MOCK_ORDERS);
+    const [orders, setOrders] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const storedOrders = localStorage.getItem('readcycle_orders');
-        if (storedOrders) {
+        const fetchOrders = async () => {
             try {
-                const parsed = JSON.parse(storedOrders);
-                // eslint-disable-next-line react-hooks/set-state-in-effect
-                setOrders([...parsed, ...MOCK_ORDERS]);
-            } catch (e) {
-                console.error("Error al cargar pedidos guardados:", e);
+                const res = await fetch("/api/orders");
+                if (!res.ok) {
+                    throw new Error("Error al obtener las órdenes");
+                }
+                const data = await res.json();
+                
+                // Mapear al formato que espera OrderCard
+                const mappedOrders = data.map((o: any) => ({
+                    id: o.id,
+                    date: o.date,
+                    status: o.status,
+                    total: o.total,
+                    items: o.items.reduce((acc: number, item: any) => acc + item.quantity, 0)
+                }));
+                
+                setOrders(mappedOrders);
+            } catch (error) {
+                console.error("Error al obtener órdenes:", error);
+            } finally {
+                setIsLoading(false);
             }
-        }
+        };
+
+        fetchOrders();
     }, []);
 
     return (
@@ -109,11 +117,21 @@ export default function ProfilePage() {
                             Historial de Compras
                         </Heading>
 
-                        <VStack gap={4} align="stretch" mb={6}>
-                            {orders.map((order) => (
-                                <OrderCard key={order.id} order={order} />
-                            ))}
-                        </VStack>
+                        {isLoading ? (
+                            <Flex justify="center" align="center" py={12}>
+                                <Spinner size="xl" color="brand.sage" />
+                            </Flex>
+                        ) : orders.length === 0 ? (
+                            <Text color="gray.500" py={8} textAlign="center">
+                                No has realizado ninguna compra todavía.
+                            </Text>
+                        ) : (
+                            <VStack gap={4} align="stretch" mb={6}>
+                                {orders.map((order) => (
+                                    <OrderCard key={order.id} order={order} />
+                                ))}
+                            </VStack>
+                        )}
 
                         {/* Botón Volver a la Tienda */}
                         <NextLink href="/" passHref>

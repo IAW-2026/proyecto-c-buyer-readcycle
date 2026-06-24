@@ -15,6 +15,7 @@ import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import AuthModal from "@/components/layout/AuthModal";
 import SellerMismatchModal from "@/components/layout/SellerMismatchModal";
+import { toaster } from "@/components/ui/toaster";
 
 interface ProductDetailsProps {
   productId: string;
@@ -61,6 +62,12 @@ export default function ProductDetails({
       if (response.ok) {
         console.log("Agregado al carrito:", title);
         window.dispatchEvent(new Event('cart-updated'));
+        toaster.create({
+          title: "Producto agregado al carrito",
+          description: `"${title || "El libro"}" se agregó a tu carrito de compras.`,
+          type: "success",
+          duration: 4000,
+        });
       } else {
         const errorData = await response.json().catch(() => ({}));
         if (errorData.error === "seller_mismatch") {
