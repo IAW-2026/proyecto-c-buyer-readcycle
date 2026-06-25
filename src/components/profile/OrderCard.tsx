@@ -6,7 +6,9 @@ import {
     LuCheck,
     LuClock,
     LuTruck,
-    LuPackage
+    LuPackage,
+    LuX,
+    LuRotateCcw
 } from "react-icons/lu"
 
 export interface Order {
@@ -27,6 +29,10 @@ const getStatusConfig = (status: string) => {
         case "Entregado": return { icon: LuCheck, color: "green.600", bg: "green.50" }
         case "En camino": return { icon: LuTruck, color: "blue.600", bg: "blue.50" }
         case "Pendiente": return { icon: LuClock, color: "orange.600", bg: "orange.50" }
+        case "Cancelado": return { icon: LuX, color: "gray.600", bg: "gray.50" }
+        case "Rechazado": return { icon: LuX, color: "red.600", bg: "red.50" }
+        case "Reembolsado": return { icon: LuRotateCcw, color: "purple.600", bg: "purple.50" }
+        case "Fallido": return { icon: LuX, color: "red.600", bg: "red.50" }
         default: return { icon: LuPackage, color: "gray.600", bg: "gray.50" }
     }
 }

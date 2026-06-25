@@ -73,28 +73,56 @@ export async function GET(request: Request) {
             const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             const formattedDate = `${dateObj.getDate()} de ${months[dateObj.getMonth()]}, ${dateObj.getFullYear()}`;
 
-            // Mapear estados
-            let status = "Pendiente";
-            if (order.shippingStatus === "DELIVERED") {
-                status = "Entregado";
-            } else if (order.shippingStatus === "SHIPPED") {
-                status = "En camino";
-            }
+            // Mapear estados según TransactionStatus y StatusDescription
+            const rawPaymentStatus = (order.paymentStatus || "").toUpperCase();
+            const rawShippingStatus = (order.shippingStatus || "").toUpperCase();
 
+            // 1. Mapear estado de pago (TransactionStatus)
             let paymentStatusLabel = "Pendiente";
-            if (order.paymentStatus === "PAID") {
+            if (rawPaymentStatus === "APPROVED" || rawPaymentStatus === "PAID") {
                 paymentStatusLabel = "Pagado";
-            } else if (order.paymentStatus === "REJECTED") {
+            } else if (rawPaymentStatus === "PENDING") {
+                paymentStatusLabel = "Pendiente";
+            } else if (rawPaymentStatus === "REJECTED") {
                 paymentStatusLabel = "Rechazado";
+            } else if (rawPaymentStatus === "REFUNDED") {
+                paymentStatusLabel = "Reembolsado";
+            } else if (rawPaymentStatus === "CANCELLED") {
+                paymentStatusLabel = "Cancelado";
             }
 
+            // 2. Mapear estado de envío en el Timeline (StatusDescription)
             let shippingStatusLabel = "Pendiente";
-            if (order.shippingStatus === "DELIVERED") {
+            if (rawShippingStatus === "DELIVERED") {
                 shippingStatusLabel = "Entregado";
-            } else if (order.shippingStatus === "SHIPPED") {
+            } else if (["PICKED_UP", "IN_TRANSIT", "OUT_FOR_DELIVERY", "SHIPPED"].includes(rawShippingStatus)) {
                 shippingStatusLabel = "Despachado";
-            } else if (order.paymentStatus === "PAID") {
-                shippingStatusLabel = "Preparando pedido";
+            } else if (rawShippingStatus === "PENDING") {
+                if (rawPaymentStatus === "APPROVED" || rawPaymentStatus === "PAID") {
+                    shippingStatusLabel = "Preparando pedido";
+                } else {
+                    shippingStatusLabel = "Pendiente";
+                }
+            } else if (rawShippingStatus === "FAILED") {
+                shippingStatusLabel = "Fallido";
+            } else if (rawShippingStatus === "CANCELLED") {
+                shippingStatusLabel = "Cancelado";
+            }
+
+            // 3. Mapear estado general de la orden (para la card)
+            let status = "Pendiente";
+            if (rawShippingStatus === "DELIVERED") {
+                status = "Entregado";
+            } else if (["PICKED_UP", "IN_TRANSIT", "OUT_FOR_DELIVERY", "SHIPPED"].includes(rawShippingStatus)) {
+                status = "En camino";
+            } else if (rawShippingStatus === "FAILED") {
+                status = "Fallido";
+            } else if (rawShippingStatus === "CANCELLED" || rawPaymentStatus === "CANCELLED") {
+                status = "Cancelado";
+            } else if (rawPaymentStatus === "REJECTED") {
+                status = "Rechazado";
+            } else if (rawPaymentStatus === "REFUNDED") {
+                status = "Reembolsado";
             }
 
             return {

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useState, useEffect } from "react"
 import { Box, Button, Container, Heading, Flex, Text, Grid, GridItem, VStack, HStack, Badge, Skeleton, Spinner } from "@chakra-ui/react"
-import { LuArrowLeft, LuPackage, LuCheck, LuClock, LuTruck, LuMapPin, LuDollarSign } from "react-icons/lu"
+import { LuArrowLeft, LuPackage, LuCheck, LuClock, LuTruck, LuMapPin, LuDollarSign, LuX, LuRotateCcw } from "react-icons/lu"
 import NextLink from "next/link"
 import { notFound } from "next/navigation"
 
@@ -22,6 +22,10 @@ const getStatusBadgeConfig = (status: string) => {
         case "Entregado": return { icon: LuCheck, color: "green.600", bg: "green.50", label: "Entregado" }
         case "En camino": return { icon: LuTruck, color: "blue.600", bg: "blue.50", label: "En camino" }
         case "Pendiente": return { icon: LuClock, color: "orange.600", bg: "orange.50", label: "Pendiente" }
+        case "Cancelado": return { icon: LuX, color: "gray.600", bg: "gray.50", label: "Cancelado" }
+        case "Rechazado": return { icon: LuX, color: "red.600", bg: "red.50", label: "Rechazado" }
+        case "Reembolsado": return { icon: LuRotateCcw, color: "purple.600", bg: "purple.50", label: "Reembolsado" }
+        case "Fallido": return { icon: LuX, color: "red.600", bg: "red.50", label: "Fallido" }
         default: return { icon: LuPackage, color: "gray.600", bg: "gray.50", label: "Procesando" }
     }
 }
@@ -31,7 +35,9 @@ const getPaymentBadgeConfig = (status: string) => {
         case "Pagado": return { color: "green.600", bg: "green.50", label: "Pagado" }
         case "Pendiente": return { color: "orange.600", bg: "orange.50", label: "Pendiente de pago" }
         case "Rechazado": return { color: "red.600", bg: "red.50", label: "Rechazado" }
-        default: return { color: "gray.600", bg: "gray.50", label: "Desconocido" }
+        case "Reembolsado": return { color: "purple.600", bg: "purple.50", label: "Reembolsado" }
+        case "Cancelado": return { color: "gray.600", bg: "gray.50", label: "Cancelado" }
+        default: return { color: "gray.600", bg: "gray.50", label: status || "Desconocido" }
     }
 }
 
